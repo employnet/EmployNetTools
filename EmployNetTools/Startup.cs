@@ -12,7 +12,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using EmployNetTools.DataLayer;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
 
 namespace EmployNetTools
 {
@@ -43,7 +42,21 @@ namespace EmployNetTools
                 });
             });
 
-            services.AddCors(options => options.AddPolicy("AllowMyApp", policy => policy.AllowAnyOrigin()));
+            // azure has its own CORS configuration
+            //services.AddCors(options => options.AddPolicy("AllowMyApp", policy => policy.AllowAnyOrigin()));
+            //services.AddCors(Options => Options.AddPolicy(name: "MyAllowSpecificOrigins",
+            //                  builder =>
+            //                  {
+            //                      //builder.WithOrigins("https://testing.clinistic.com",
+            //                      //                    "https://jsonformatter.curiousconcept.com",
+            //                      //                    "https://linkyounow.com")
+            //                      builder.AllowAnyHeader()
+            //                      .AllowAnyMethod()
+            //                      .AllowCredentials()
+            //                      .SetIsOriginAllowed(orgin => true)
+            //                      .AllowAnyOrigin();
+                                  
+            //                  }));
 
             services.AddControllersWithViews().
                   AddJsonOptions(options =>
@@ -63,6 +76,8 @@ namespace EmployNetTools
                 app.UseSwaggerUi3();
             }
 
+           // app.UseCors("MyAllowSpecificOrigins");
+
             app.UseHttpsRedirection();
 
             app.UseRouting();
@@ -73,10 +88,13 @@ namespace EmployNetTools
             {
                 endpoints.MapControllers();
             });
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller}/{action}");
+            });
 
-            app.UseHttpsRedirection();
-
-            app.UseCors("AllowMyApp");
         }
     }
 }

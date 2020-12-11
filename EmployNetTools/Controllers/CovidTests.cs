@@ -10,8 +10,9 @@ using System.Globalization;
 
 namespace EmployNetTools.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[Action]")]
     [ApiController]
+    
     public class CovidTests : ControllerBase
     {
         private readonly DataSurfContext _context;
@@ -25,30 +26,79 @@ namespace EmployNetTools.Controllers
         [HttpGet(Name = nameof(GetTests))]
         public IActionResult GetTests()
         {
-            
-            var    test = new CovidTest();
+
+            var test = new CovidTest();
             return Ok(test);
         }
 
         // GET api/<CovidTests>/5
-        [HttpGet("{id}")]
+       [HttpGet("{id}")]
+       [ActionName("ID")]
         public IActionResult Get(int id)
         {
-            DataLayer.Models.CovidTestDBModel model = CovidTest.GetCovidRecord(_context,id);
+            DataLayer.Models.CovidTestJson model = CovidTest.GetCovidRecord(_context, id);
             return Ok(model);
         }
 
+        //[HttpPost("{id}")]
+        //[ActionName("ID")]
+        //public IActionResult Post(int id)
+        //{
+        //    DataLayer.Models.CovidTestDBModel model = CovidTest.GetCovidRecord(_context, id);
+        //    return Ok(model);
+        //}
+
         // POST api/<CovidTests>
         [HttpPost]
-        public async Task<IActionResult> PostAsync([FromBody] DataLayer.Models.CovidTestDBModel model)
+        [ActionName("Update")]
+        public IActionResult Update([FromBody] DataLayer.Models.CovidTestJson model)
         {
 
-             
-
-            await CovidTest.AddCovidRecord(_context, model);
-
+            _context.SaveError("Entering Update", "");
+            try
+            { 
+                CovidTest.AddCovidRecord(_context, model);
+            }
+            catch(Exception ex)
+            {
+                _context.SaveError("In Update", ex.Message);
+                return BadRequest(ex.Message);
+            }
             return Ok();
 
+        }
+
+        [HttpGet("details")]
+        [ActionName("Search")]
+        public IActionResult Find(string id, string patient_first_name, string patient_last_name, string patient_email)
+        {
+
+            DataLayer.Models.CovidTestJson json;
+            DataLayer.Models.CovidTestSearch search = new DataLayer.Models.CovidTestSearch();
+            search.CovidTestId = id;
+            search.patient_email = patient_email;
+            search.patient_first_name = patient_first_name;
+            search.patient_last_name = patient_last_name;
+
+            json = DataLayer.CovidTest.GetCovidJson(_context, search);
+
+            return Ok(json);
+        }
+
+        [HttpPost]
+        [ActionName("search")]
+        public IActionResult Search([FromBody]DataLayer.Models.CovidTestSearch model)
+        {
+            try
+            {
+                DataLayer.Models.CovidTestDBModel result = CovidTest.GetCovidRecord(_context, model);
+                return Ok(result);
+            }
+            catch(Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
         }
 
         // PUT api/<CovidTests>/5
