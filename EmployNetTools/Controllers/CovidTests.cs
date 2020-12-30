@@ -12,7 +12,7 @@ namespace EmployNetTools.Controllers
 {
     [Route("api/[controller]/[Action]")]
     [ApiController]
-    
+
     public class CovidTests : ControllerBase
     {
         private readonly DataSurfContext _context;
@@ -32,7 +32,7 @@ namespace EmployNetTools.Controllers
         }
 
         // GET api/<CovidTests>/5
-       [HttpGet("{id}")]
+        [HttpGet("{id}")]
        [ActionName("ID")]
         public IActionResult Get(int id)
         {
@@ -64,8 +64,27 @@ namespace EmployNetTools.Controllers
                 _context.SaveError("In Update", ex.Message);
                 return BadRequest(ex.Message);
             }
-            return Ok();
+            return Ok("Success");
 
+        }
+
+        [HttpPost]
+        [ActionName("AddSignup")]
+        public IActionResult AddSignup([FromBody] DataLayer.Models.CovidTestGenieJSon model)
+        {
+            _context.SaveError("Adding Signup", "");
+            try
+            {
+                if (CovidTest.AddGeniueSignup(_context, model) == true)
+                    return Ok("Success");
+                else
+                    return NotFound(); //Ok("Skip");
+            }
+            catch (Exception ex)
+            {
+                _context.SaveError("Error in Signup", ex.Message);
+                return BadRequest();
+            }
         }
 
         [HttpGet("details")]
@@ -82,6 +101,9 @@ namespace EmployNetTools.Controllers
 
             json = DataLayer.CovidTest.GetCovidJson(_context, search);
 
+            if (json == null)
+                return NotFound();
+
             return Ok(json);
         }
 
@@ -92,6 +114,9 @@ namespace EmployNetTools.Controllers
             try
             {
                 DataLayer.Models.CovidTestDBModel result = CovidTest.GetCovidRecord(_context, model);
+                if (result == null)
+                    return NotFound();
+
                 return Ok(result);
             }
             catch(Exception ex)
@@ -100,6 +125,48 @@ namespace EmployNetTools.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+
+        [HttpPost]
+        [ActionName("CovidTestEvents")]
+        public IActionResult SaveEvent([FromBody] DataLayer.Models.CovidTestEventsJSon json)
+        {
+
+            _context.SaveError("Entering Save CovidtestEvents", "");
+            try
+            {
+
+                DataLayer.Models.CovidTestEvents model = new DataLayer.Models.CovidTestEvents();
+                model.enddate = DateTime.Parse(json.enddate);
+                model.startdate = DateTime.Parse(json.startdate);
+                model.Title = json.Title;
+                model.SignupID = json.SignupID;
+                model.TotalSlots = json.TotalSlots;
+                model.FilledSlots = json.FilledSlots;
+
+                CovidTest.AddEventRecord(_context, model);
+            }
+            catch (Exception ex)
+            {
+                _context.SaveError("In Update", ex.Message);
+                return BadRequest(ex.Message);
+            }
+            return Ok("Success");
+
+        }
+
+        [HttpGet("{CovidTestEvents}")]
+        [ActionName("CovidTestEvents")]
+        public IActionResult GetEvent(int CovidTestEvents)
+        {
+            DataLayer.Models.CovidTestEvents result = CovidTest.GetCovidTestEvents(_context, CovidTestEvents);
+            if (result == null)
+                return NoContent();
+            else
+                return Ok(result);
+        }
+
+
 
         // PUT api/<CovidTests>/5
         [HttpPut("{id}")]

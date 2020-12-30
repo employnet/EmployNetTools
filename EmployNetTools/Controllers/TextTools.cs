@@ -5,13 +5,14 @@ using System.Threading.Tasks;
 //using System.Web.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using EmployNetTools.DataLayer.Models.TempWorks;
 //using FromBodyAttribute = System.Web.Http.FromBodyAttribute;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace EmployNetTools.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[Action]")]
     [ApiController]
     public class TextTools : ControllerBase
     {
@@ -39,18 +40,25 @@ namespace EmployNetTools.Controllers
         }
 
         [HttpGet("{text}")]
-        public string Get([FromBody] string value)
+        [ActionName("CustomerReplaceNulls")]
+        public IActionResult CustomerReplaceNulls([FromBody] Customer model)
         {
             try {
-  
-                
-                    return value.Replace("null", "na");
+
+
+                    model.BranchName = string.IsNullOrEmpty(model.BranchName) == true ? "" : model.BranchName;
+                    model.CustomerName = string.IsNullOrEmpty(model.CustomerName) == true ? "" : model.CustomerName.Replace("\r\n", "");
+                    //model.Municipality = string.IsNullOrEmpty(model.Municipality) == true ? "" : model.Municipality;
+                    //model.OfficePhone = string.IsNullOrEmpty(model.OfficePhone) == true ? "" : model.OfficePhone;
+                    //model.Region = string.IsNullOrEmpty(model.Region) == true ? "" : model.Region;
+                    //model.Status = string.IsNullOrEmpty(model.Status) == true ? "" : model.Status;
+                return Ok(model);
                 
                
                
             } catch(Exception ex) {
 
-                return ex.Message;
+                return BadRequest(ex.Message);
 
             }
         }
