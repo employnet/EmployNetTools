@@ -148,13 +148,16 @@ namespace EmployNetTools.DataLayer.Models.TempWorksDB
         public string firstName { get; set; }
         public string middleName { get; set; }
         public string lastName { get; set; }
+        public string phoneNumber { get; set; }
         public string alias { get; set; }
         public string namePrefix { get; set; }
         public string nameSuffix { get; set; }
         public string governmentPersonalId { get; set; }
         public bool isActive { get; set; }
+        public bool isAssigned { get; set; }
         public DateTime activationDate { get; set; }
         public DateTime deactivationDate { get; set; }
+        public bool hasResumeOnFile { get; set; }
         public int resumeDocumentId { get; set; }
         public string resumeFileName { get; set; }
         public bool isI9OnFile { get; set; }
@@ -176,5 +179,8 @@ namespace EmployNetTools.DataLayer.Models.TempWorksDB
         public string driverLicenseClass { get; set; }
         public string driverLicenseExpire { get; set; }
         public int addressId { get; set; }
+        public string lastMessage { get; set; }
+        public string emailAddress { get; set; }
+        public string postalCode { get; set; }
     }
 }

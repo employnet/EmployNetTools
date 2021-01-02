@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using EmployNetTools.DataLayer.Models.TempWorks;
 using EmployNetTools.DataLayer;
+using Microsoft.EntityFrameworkCore;
+using System.Data.SqlClient;
+
 //using FromBodyAttribute = System.Web.Http.FromBodyAttribute;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -21,9 +24,11 @@ namespace EmployNetTools.Controllers
 
         public TempWorks(DataSurfContext context)
         {
+            context.ChangeTracker.QueryTrackingBehavior = Microsoft.EntityFrameworkCore.QueryTrackingBehavior.NoTracking;
             _context = context;
         }
 
+       
         // GET: <TextTools>
         [HttpGet(Name = nameof(WhoAmI))]
         public IActionResult WhoAmI()
@@ -44,52 +49,81 @@ namespace EmployNetTools.Controllers
         public IActionResult AddEmployees([FromBody] Employees models)
         {
 
-            try
-            {
-                if(models.data==null || models.data.Count() == 0)
-                {
-                    _context.SaveError("Nothing to process, end of employees", "");
-                    return Ok("success");
-                }
-                int start = models.data[0].employeeId;
-                _context.SaveError("Add Bulk Employee", "Total " + models.data.Count() + " records, starting at id "+start.ToString());
-                foreach (Employee model in models.data)
-                {
-                    DataLayer.TempWorks.AddEmployee(_context, model);
-                }
-                _context.SaveChanges();
-                            } catch (Exception ex)
-                {
-                _context.SaveError("Error in employees", ex.Message);
-                return BadRequest(ex.Message);
-            }
-            _context.SaveError("End of bulk employees", "");
-            return Ok("Success");
+//            DbContextOptionsBuilder options = new DbContextOptionsBuilder();
 
-[HttpPost]
+            string conStr = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
+ 
+            using (SqlConnection con = new SqlConnection(conStr))
+            {
+
+                try
+                {
+                    con.Open();
+                    if (models.data == null || models.data.Count() == 0)
+                    {
+                        _context.SaveError("Nothing to process, end of employees", "");
+                        return Ok("success");
+                    }
+                    int start = models.data[0].employeeId;
+                    _context.SaveError("Add Bulk Employee", "Total " + models.data.Count() + " records, starting at id " + start.ToString());
+
+                    
+                    int i = 0; // debug useage
+                    foreach (Employee model in models.data)
+                    {
+                        i++;
+                        //DataLayer.TempWorks.AddEmployee(con, model);
+                        DataLayer.TempWorks.AddEmployeeProc(con, model);
+                    }
+                    // int count = _context.SaveChangesAsync();
+                    //con.SaveChanges();
+
+
+                    _context.SaveError("End of bulk employees", "saved " + models.data.Count().ToString() + " records, starting at id " + start.ToString());
+                    //con.SaveError("End of bulk employees", "saved " + models.data.Count().ToString() + " records, starting at id " + start.ToString());
+                }
+                catch (Exception ex)
+                {
+                    _context.SaveError("Error in employees", ex.Message);
+
+                    return BadRequest(ex.Message);
+                }
+            }
+            return Ok();
+        }
+        
+        [HttpPost]
         [ActionName("AddAssignments")]
         public IActionResult AddAssignments([FromBody] Assignments models)
         {
-            try
+            string conStr = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
+
+            using (SqlConnection con = new SqlConnection(conStr))
             {
-                if(models.data==null || models.data.Count() == 0)
+                try
                 {
-                    _context.SaveError("Nothing to process, end of asssignments", "");
-                    return Ok("success");
+                    con.Open();
+
+                    if (models.data == null || models.data.Count() == 0)
+                    {
+                        _context.SaveError("Nothing to process, end of asssignments", "");
+                        return Ok("success");
+                    }
+                    int start = models.data[0].assignmentId;
+                    _context.SaveError("Add Bulk Assignment", "Total " + models.data.Count() + " records, starting at id " + start.ToString());
+                    foreach (Assignment model in models.data)
+                    {
+                        DataLayer.TempWorks.AddAssignmentProc(con, model);
+                    }
+                    //_context.SaveChanges();
                 }
-                int start = models.data[0].assignmentId;
-                _context.SaveError("Add Bulk Assignment", "Total " + models.data.Count() + " records, starting at id "+start.ToString());
-                foreach (Assignment model in models.data)
+                catch (Exception ex)
                 {
-                    DataLayer.TempWorks.AddAssignment(_context, model);
+                    _context.SaveError("Error in assignments", ex.Message);
+                    return BadRequest(ex.Message);
                 }
-                _context.SaveChanges();
-            } catch(Exception ex)
-            {
-                _context.SaveError("Error in assignments", ex.Message);
-                return BadRequest(ex.Message);
+                _context.SaveError("End of bulk assignments", "Total " + models.data.Count() + " records, starting at id " + models.data[0].assignmentId);
             }
-            _context.SaveError("End of bulk assignments","");
             return Ok("Success");
         }
 

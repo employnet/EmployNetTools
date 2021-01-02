@@ -8,13 +8,13 @@ namespace EmployNetTools.DataLayer
     [Keyless]
     public class DataSurfContext:DbContext
     {
+
+ 
         public DataSurfContext(DbContextOptions<DataSurfContext> options) : base(options)
         {
-           
-        }
 
-        
-        
+
+        }
         public DbSet<Models.CovidTestDBModel> CovidTests { get; set; }
 
         public DbSet<Models.ACTIVITY_LOG> Activity_log { get; set; }

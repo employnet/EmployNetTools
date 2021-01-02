@@ -32,6 +32,7 @@ namespace EmployNetTools
 
             services.AddDbContext<DataSurfContext>(options =>
             {
+
                 options.UseSqlServer(Configuration["ConnectionString"],
                 sqlServerOptionsAction: sqlOptions =>
                 {
@@ -55,7 +56,7 @@ namespace EmployNetTools
             //                      .AllowCredentials()
             //                      .SetIsOriginAllowed(orgin => true)
             //                      .AllowAnyOrigin();
-                                  
+
             //                  }));
 
             services.AddControllersWithViews().

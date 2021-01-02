@@ -160,10 +160,10 @@ public class Assignment
         public bool isAssigned { get; set; }
         public string lastMessage { get; set; }
         public string postalCode { get; set; }
-        public string hasResumeOnFile { get; set; }
+        public bool hasResumeOnFile { get; set; }
         public string cellPhoneNumber { get; set; }
         public string emailAddress { get; set; }
-        public int governmentPersonalId { get; set; }
+        public string governmentPersonalId { get; set; }
     }
     
 
