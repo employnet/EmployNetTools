@@ -10,7 +10,37 @@ namespace EmployNetTools.DataLayer
 {
     public class TempWorks
     {
- 
+
+        public static int AddAddressProc(SqlConnection con, DataLayer.Models.TempWorks.Address model)
+        {
+            if (String.IsNullOrEmpty(model.Street1)) return 0;
+
+            int AddressId = 0;
+
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = con;
+                cmd.Parameters.Add(new SqlParameter("@street1", model.Street1));
+                cmd.Parameters.Add(new SqlParameter("@street2",  string.IsNullOrEmpty(model.Street2)?"":model.Street2));
+                cmd.Parameters.Add(new SqlParameter("@postalCode", model.PostalCode));
+                cmd.Parameters.Add(new SqlParameter("@region", model.Region));
+                cmd.Parameters.Add(new SqlParameter("@municipality", model.Municipality));
+                cmd.Parameters.Add(new SqlParameter("@attentionTo", string.IsNullOrEmpty(model.AttentionTo)?"":model.AttentionTo));
+                cmd.Parameters.Add(new SqlParameter("@country", model.Country));
+                
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.CommandText = "prAddAddress";
+                var ret = cmd.ExecuteScalar();
+                if (ret != null)
+                    AddressId = (int)ret;
+
+            }
+
+            return AddressId;
+        }
+
+
+
         public static int AddAddress(DataSurfContext context, DataLayer.Models.TempWorksDB.Address model)
         {
             if (String.IsNullOrEmpty(model.Street1)) return 0;
@@ -40,6 +70,42 @@ namespace EmployNetTools.DataLayer
             return result.AddressId;
         }
 
+        public static bool AddCustomerProc(SqlConnection con, DataLayer.Models.TempWorks.Customer model, bool replace=false)
+        {
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = con;
+                cmd.Parameters.Add(new SqlParameter("@override", replace == false ? 0 : 1));
+                cmd.Parameters.Add(new SqlParameter("@customerId", model.CustomerId));
+                cmd.Parameters.Add(new SqlParameter("@customerName", model.CustomerName));
+                cmd.Parameters.Add(new SqlParameter("@departmentName", model.DepartmentName));
+                cmd.Parameters.Add(new SqlParameter("@parentCustomerId", model.ParentCustomerId));
+                cmd.Parameters.Add(new SqlParameter("@rootCustomerId", model.RootCustomerId));
+                cmd.Parameters.Add(new SqlParameter("@branchId", model.BranchId));
+                cmd.Parameters.Add(new SqlParameter("@branchName", model.BranchName));
+                cmd.Parameters.Add(new SqlParameter("@customerStatusId", model.CustomerStatusId));
+                cmd.Parameters.Add(new SqlParameter("@customerStatus", model.CustomerStatus));
+                cmd.Parameters.Add(new SqlParameter("@website", String.IsNullOrEmpty(model.Website)?"":model.Website));
+                cmd.Parameters.Add(new SqlParameter("@isActive", model.IsActive));
+                cmd.Parameters.Add(new SqlParameter("@dateActivated", DateTime.Parse(String.IsNullOrEmpty(model.DateActivated) ? "01/01/1900" : model.DateActivated)));
+                cmd.Parameters.Add(new SqlParameter("@worksiteId", model.WorksiteId));
+                cmd.Parameters.Add(new SqlParameter("@worksiteName", model.WorksiteName));
+
+                cmd.Parameters.Add(new SqlParameter("@note", model.Note));
+
+                cmd.Parameters.Add(new SqlParameter("@addressId", AddAddressProc(con, model.Address)));
+                cmd.Parameters.Add(new SqlParameter("@billingAddressId", AddAddressProc(con, model.BillingAddress)));
+                cmd.Parameters.Add(new SqlParameter("@worksiteAddressId", AddAddressProc(con, model.WorksiteAddress)));
+                cmd.Parameters.Add(new SqlParameter("@isKronosTime", 0));
+
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.CommandText = "prAddCustomer";
+                cmd.ExecuteNonQuery();
+
+            }
+            return true;
+        }
+
         public static bool AddCustomer(DataSurfContext context, DataLayer.Models.TempWorks.Customer model)
         {
 
@@ -55,7 +121,7 @@ namespace EmployNetTools.DataLayer
             result.CustomerName = model.CustomerName;
             result.CustomerStatus = model.CustomerStatus;
             result.CustomerStatusId = model.CustomerStatusId;
-            result.DateActivated = model.DateActivated.LocalDateTime;
+            result.DateActivated = DateTime.Parse(model.DateActivated);
             result.DepartmentName = model.DepartmentName;
             //result.ParentCustomerId = model.ParentCustomerId;
             result.RootCustomerId = model.RootCustomerId;
@@ -101,27 +167,78 @@ namespace EmployNetTools.DataLayer
 
         }
 
-        public static void AddEmployeeProc(SqlConnection con, Employee model)
+  
+        public static void AddEmployeeProc(SqlConnection con, Employee model, bool replace = false)
         {
-            using(SqlCommand cmd = new SqlCommand())
+            using (SqlCommand  cmd = new SqlCommand())
             {
                 cmd.Connection = con;
-
-                cmd.Parameters.Add(new SqlParameter("@employeeId",model.employeeId));
+                cmd.Parameters.Add(new SqlParameter("@override", replace == false ? 0 : 1));
+                cmd.Parameters.Add(new SqlParameter("@employeeId", model.employeeId));
+                cmd.Parameters.Add(new SqlParameter("@employeeGuid", model.employeeGuid));
+                cmd.Parameters.Add(new SqlParameter("@branchId", model.branchid));
+                cmd.Parameters.Add(new SqlParameter("@branchName", model.branch));
                 cmd.Parameters.Add(new SqlParameter("@firstName", model.firstName));
+                cmd.Parameters.Add(new SqlParameter("@middleName", model.middleName));
                 cmd.Parameters.Add(new SqlParameter("@lastName", model.lastName));
+                cmd.Parameters.Add(new SqlParameter("@phoneNumber", string.IsNullOrEmpty(model.cellPhoneNumber) ? model.phoneNumber : model.cellPhoneNumber));
+                cmd.Parameters.Add(new SqlParameter("@alias", model.alias));
+                cmd.Parameters.Add(new SqlParameter("@namePrefix", model.namePrefix));
+                cmd.Parameters.Add(new SqlParameter("@nameSuffix", model.nameSuffix));
+                cmd.Parameters.Add(new SqlParameter("@governmentPersonalId", model.governmentPersonalId));
                 cmd.Parameters.Add(new SqlParameter("@isActive", model.isActive));
                 cmd.Parameters.Add(new SqlParameter("@isAssigned", model.isAssigned));
-                cmd.Parameters.Add(new SqlParameter("@postalCode", model.postalCode));
-                cmd.Parameters.Add(new SqlParameter("@phoneNumber", string.IsNullOrEmpty(model.cellPhoneNumber) ? model.phoneNumber : model.cellPhoneNumber));
-                cmd.Parameters.Add(new SqlParameter("@branchName", model.branch));
+                cmd.Parameters.Add(new SqlParameter("@activationDate", DateTime.Parse(String.IsNullOrEmpty(model.activationDate) ? "01/01/1900" : model.activationDate)));
+                cmd.Parameters.Add(new SqlParameter("@deactivationDate", DateTime.Parse(String.IsNullOrEmpty(model.deactivationDate) ? "01/01/1900" : model.deactivationDate)));
                 cmd.Parameters.Add(new SqlParameter("@hasResumeOnFile", model.hasResumeOnFile));
+                cmd.Parameters.Add(new SqlParameter("@resumeDocumentId", String.IsNullOrEmpty(model.resumeDocumentId)?0:Convert.ToInt32(model.resumeDocumentId)));
+                cmd.Parameters.Add(new SqlParameter("@resumeFileName", model.resumeFileName));
+                cmd.Parameters.Add(new SqlParameter("@postalCode", model.postalCode));
+                cmd.Parameters.Add(new SqlParameter("@i9ExpirationDate", DateTime.Parse(String.IsNullOrEmpty(model.i9ExpirationDate) ? "01/01/1900" : model.i9ExpirationDate)));
+                cmd.Parameters.Add(new SqlParameter("@isI9OnFile", model.isI9OnFile));
+                cmd.Parameters.Add(new SqlParameter("@jobTitle", model.jobTitle));
+                cmd.Parameters.Add(new SqlParameter("@note", model.note));
+                cmd.Parameters.Add(new SqlParameter("@numericRating", model.numericRating));
+                cmd.Parameters.Add(new SqlParameter("@serviceRepId", model.serviceRepId));
+                cmd.Parameters.Add(new SqlParameter("@serviceRep", model.serviceRep));
+                cmd.Parameters.Add(new SqlParameter("@serviceRepChatName", model.serviceRepChatName));
+                cmd.Parameters.Add(new SqlParameter("@createdByServiceRepId", model.createdByServiceRepId));
+                cmd.Parameters.Add(new SqlParameter("@createdByServiceRep", model.createdByServiceRep));
+                cmd.Parameters.Add(new SqlParameter("@companyId", model.companyId));
+                cmd.Parameters.Add(new SqlParameter("@company", model.company));
+                //cmd.Parameters.Add(new SqlParameter("@alternateEmployeeId", string.IsNullOrEmpty(model.alternateEmployeeId) ? 0 : Convert.ToInt32(model.alternateEmployeeId)));
+                cmd.Parameters.Add(new SqlParameter("@employerId", model.employerId));
+                cmd.Parameters.Add(new SqlParameter("@employer", model.employer));
                 cmd.Parameters.Add(new SqlParameter("@emailAddress", model.emailAddress));
-                cmd.Parameters.Add(new SqlParameter("@governmentPersonalId", model.governmentPersonalId));
+                cmd.Parameters.Add(new SqlParameter("@driverLicenseNumber", model.driverLicenseNumber));
+                cmd.Parameters.Add(new SqlParameter("@driverLicenseClass", model.driverLicenseClass));
+                //cmd.Parameters.Add(new SqlParameter("@driverLicenseExpire", DateTime.Parse(String.IsNullOrEmpty(model.driverLicenseExpire) ? "01/01/1900" : model.driverLicenseExpire)?<DateTime.MinValue? DateTime.MinValue:DateTime.Parse(model.driverLicenseExpire))));
+                cmd.Parameters.Add(new SqlParameter("@lastMessage", model.lastMessage));
+
+                int add = 0;
+
+                if (model.address != null)
+                { 
+                    Address addy = new Address
+                    {
+                        Street1 = model.address.Street1,
+                        Street2 = model.address.Street2,
+                        PostalCode = model.address.PostalCode,
+                        AttentionTo = model.address.AttentionTo,
+                        Country = model.address.Country,
+                        Municipality = model.address.Municipality,
+                        Region = model.address.Region
+                    };
+
+                    add = DataLayer.TempWorks.AddAddressProc(con, addy);
+                }
+                cmd.Parameters.Add(new SqlParameter("@addressId", add));
+                
+
 
                 cmd.CommandType = System.Data.CommandType.StoredProcedure;
                 cmd.CommandText = "prAddEmployee";
-                int count = cmd.ExecuteNonQuery();
+                cmd.ExecuteNonQuery();
 
 
             }
@@ -292,6 +409,33 @@ namespace EmployNetTools.DataLayer
 
 
             return true;
+        }
+
+        public static bool AddDocumentProc(SqlConnection con, int EmployeeId, Document model)
+        {
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = con;
+
+                cmd.Parameters.Add(new SqlParameter("@EmployeeId", EmployeeId));
+                cmd.Parameters.Add(new SqlParameter("@DocumentId", model.documentId));
+                cmd.Parameters.Add(new SqlParameter("@Description", model.description));
+                cmd.Parameters.Add(new SqlParameter("@FileType", model.fileType));
+                cmd.Parameters.Add(new SqlParameter("@DocumentTypeId", model.documentTypeId));
+                cmd.Parameters.Add(new SqlParameter("@DocumentType", model.documentType));
+                cmd.Parameters.Add(new SqlParameter("@DocumentName", model.documentName));
+                cmd.Parameters.Add(new SqlParameter("@FileName", model.fileName));
+                cmd.Parameters.Add(new SqlParameter("@CanBeDeleted", model.canBeDeleted));
+                cmd.Parameters.Add(new SqlParameter("@CanBedEdited", model.canBeEdited));
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                cmd.CommandText = "prAddDocument";
+                int count = cmd.ExecuteNonQuery();
+
+
+            }
+
+            return false;
         }
     }
 }

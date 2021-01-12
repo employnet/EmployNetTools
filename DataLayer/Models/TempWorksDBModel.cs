@@ -10,20 +10,37 @@ namespace EmployNetTools.DataLayer.Models.TempWorksDB
 
     }
 
-    
+    public class CustomerList
+    {
+        [Key]
+        public int CustomerId { get; set; }
+    }
+
+    public class EmployeeList
+    {
+        [Key]
+        public int EmployeeId { get; set; }
+    }
+
+    public class EmployeeAllList
+    {
+        [Key]
+        public int EmployeeId { get; set; }
+    }
+
 
     public class Customer
         {
         [Key]
-            public int CustomerId { get; set; }
+            public Int64 CustomerId { get; set; }
 
             public string CustomerName { get; set; }
 
             public string DepartmentName { get; set; }
 
-            public int ParentCustomerId { get; set; }
+            public Int64 ParentCustomerId { get; set; }
 
-            public int RootCustomerId { get; set; }
+            public Int64 RootCustomerId { get; set; }
 
             public int BranchId { get; set; }
 

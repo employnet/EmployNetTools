@@ -9,6 +9,7 @@ using EmployNetTools.DataLayer.Models.TempWorks;
 using EmployNetTools.DataLayer;
 using Microsoft.EntityFrameworkCore;
 using System.Data.SqlClient;
+using DataLayer;
 
 //using FromBodyAttribute = System.Web.Http.FromBodyAttribute;
 
@@ -28,6 +29,87 @@ namespace EmployNetTools.Controllers
             _context = context;
         }
 
+
+        [HttpGet]
+        [ActionName("GetEmployeeDocs")]
+        public async Task<IActionResult> GetEmployeeDocsAsync()
+        {
+            var emps = _context.GetEmployeeAllListAsync().Result;
+
+            string conStr = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
+
+            using (SqlConnection con = new SqlConnection(conStr))
+            {
+                try
+                {
+                    con.Open();
+                    foreach (DataLayer.Models.TempWorksDB.EmployeeAllList e in emps)
+                    {
+                        try
+                        {
+                            Documents docs = await TempWorksAPI.GetEmployeeDocsFromTempworksAsync(e.EmployeeId);
+                            if(docs.count>0)
+                            { 
+                                foreach(Document doc in docs.data)
+                                { 
+                                    DataLayer.TempWorks.AddDocumentProc(con, e.EmployeeId, doc);
+                                }
+                                _context.SaveErrorProc(con, "Added Doc for employee " + e.EmployeeId.ToString(), "");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _context.SaveErrorProc(con, "Error Updating Employee " + e.EmployeeId.ToString(), ex.Message);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _context.SaveErrorProc(con, "Error adding employee", ex.Message);
+                    return BadRequest(ex.Message);
+                }
+
+            }
+            return Ok();
+        }
+        [HttpGet]
+        [ActionName("GetEmployeeDetails")]
+        public async Task<IActionResult> GetEmployeeDetailsAsync()
+        {
+            var emps = _context.GetEmployeeListAsync().Result;
+
+            string conStr = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
+
+            using (SqlConnection con = new SqlConnection(conStr))
+            {
+
+                try
+                {
+                    con.Open();
+
+                    foreach (DataLayer.Models.TempWorksDB.EmployeeList e in emps)
+                    {
+                        try
+                        {
+                            Employee emp = await TempWorksAPI.GetEmployeeFromTempworksAsync(e.EmployeeId);
+                            DataLayer.TempWorks.AddEmployeeProc(con, emp, true);
+                            _context.SaveErrorProc(con, "Updated Employee" + emp.employeeId.ToString(), "");
+                        }
+                        catch(Exception ex)
+                        {
+                            _context.SaveErrorProc(con, "Error Updating Employee " + e.EmployeeId.ToString(), ex.Message);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _context.SaveErrorProc(con, "Error adding employee", ex.Message);
+                    return BadRequest(ex.Message);
+                }
+
+            }
+            return Ok();
+        }
        
         // GET: <TextTools>
         [HttpGet(Name = nameof(WhoAmI))]
@@ -43,6 +125,43 @@ namespace EmployNetTools.Controllers
         {
             return "value";
         }
+
+        [HttpPost]
+        [ActionName("AddEmployee")]
+        public IActionResult AddEmployee([FromBody] Employee model)
+        {
+
+            //            DbContextOptionsBuilder options = new DbContextOptionsBuilder();
+
+            string conStr = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
+
+            using (SqlConnection con = new SqlConnection(conStr))
+            {
+
+                try
+                {
+                    con.Open();
+                    if (model == null)
+                    {
+                        _context.SaveErrorProc(con,"Nothing to process, end of employee", "");
+                        return Ok("success");
+                    }
+
+                    DataLayer.TempWorks.AddEmployeeProc(con, model);
+
+
+                    _context.SaveErrorProc(con,"End of bulk employees", "saved employeeId " + model.employeeId.ToString());
+                }
+                catch (Exception ex)
+                {
+                    _context.SaveErrorProc(con,"Error in employee " + model.employeeId.ToString(), ex.Message);
+
+                    return BadRequest(ex.Message);
+                }
+            }
+            return Ok();
+        }
+
 
         [HttpPost]
         [ActionName("AddEmployees")]
@@ -61,11 +180,11 @@ namespace EmployNetTools.Controllers
                     con.Open();
                     if (models.data == null || models.data.Count() == 0)
                     {
-                        _context.SaveError("Nothing to process, end of employees", "");
+                        _context.SaveErrorProc(con,"Nothing to process, end of employees", "");
                         return Ok("success");
                     }
                     int start = models.data[0].employeeId;
-                    _context.SaveError("Add Bulk Employee", "Total " + models.data.Count() + " records, starting at id " + start.ToString());
+                    _context.SaveErrorProc(con,"Add Bulk Employee", "Total " + models.data.Count() + " records, starting at id " + start.ToString());
 
                     
                     int i = 0; // debug useage
@@ -79,12 +198,12 @@ namespace EmployNetTools.Controllers
                     //con.SaveChanges();
 
 
-                    _context.SaveError("End of bulk employees", "saved " + models.data.Count().ToString() + " records, starting at id " + start.ToString());
+                    _context.SaveErrorProc(con,"End of bulk employees", "saved " + models.data.Count().ToString() + " records, starting at id " + start.ToString());
                     //con.SaveError("End of bulk employees", "saved " + models.data.Count().ToString() + " records, starting at id " + start.ToString());
                 }
                 catch (Exception ex)
                 {
-                    _context.SaveError("Error in employees", ex.Message);
+                    _context.SaveErrorProc(con,"Error in employees", ex.Message);
 
                     return BadRequest(ex.Message);
                 }
@@ -125,6 +244,71 @@ namespace EmployNetTools.Controllers
                 _context.SaveError("End of bulk assignments", "Total " + models.data.Count() + " records, starting at id " + models.data[0].assignmentId);
             }
             return Ok("Success");
+        }
+
+        [HttpPost]
+        [ActionName("AddCustomer")]
+        public IActionResult AddCustomers([FromBody] Customers models)
+        {
+            string conStr = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
+
+            using (SqlConnection con = new SqlConnection(conStr))
+            {
+                try
+                {
+                    if (models.count == 0)
+                        return BadRequest("No Customers sent");
+
+                    foreach (Customer c in models.data)
+                    {
+                        DataLayer.TempWorks.AddCustomerProc(con, c, false);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+            return Ok();
+        }
+
+        [HttpGet]
+        [ActionName("GetCustomerDetails")]
+        public async Task<IActionResult> GetCustomerDetailsAsync()
+        {
+            var custs = _context.GetCustomerListAsync().Result;
+
+            string conStr = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
+
+            using (SqlConnection con = new SqlConnection(conStr))
+            {
+
+                try
+                {
+                    con.Open();
+
+                    foreach (DataLayer.Models.TempWorksDB.CustomerList c in custs)
+                    {
+                        try
+                        {
+                            Customer cust = await TempWorksAPI.GetCustomerFromTempworksAsync(c.CustomerId);
+                            DataLayer.TempWorks.AddCustomerProc(con, cust, true);
+                            _context.SaveErrorProc(con, "Updated Customer" + cust.CustomerId.ToString(), "");
+                        }
+                        catch (Exception ex)
+                        {
+                            _context.SaveErrorProc(con, "Error Updating Customer " + c.CustomerId.ToString(), ex.Message);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _context.SaveErrorProc(con, "Error adding Customer", ex.Message);
+                    return BadRequest(ex.Message);
+                }
+
+            }
+            return Ok();
         }
 
         [HttpPost]
