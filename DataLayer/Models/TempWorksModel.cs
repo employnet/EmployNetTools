@@ -25,7 +25,6 @@ namespace EmployNetTools.DataLayer.Models.TempWorks
 
         public string DepartmentName { get; set; }
 
-        private Int64 parentCustomerId;
         public Int64? ParentCustomerId { get; set; }
 
         public Int64 RootCustomerId { get; set; }
@@ -248,6 +247,84 @@ namespace EmployNetTools.DataLayer.Models.TempWorks
         public Int32 positionsRequired { get; set; }
         public Int32 positionsFilled { get; set; }
         public string worksite { get; set; }
+    }
+
+    public class JobDetail
+    {
+        public Int64 jobOrderId { get; set; }
+        public Int32 branchId { get; set; }
+        public string branch { get; set; }
+        public Int32 jobOrderTypeId { get; set; }
+        public string jobOrderType { get; set; }
+        public Int32 jobTitleId { get; set; }
+        public string jobTitle { get; set; }
+        public string jobDescription { get; set; }
+        public double payRate { get; set; }
+        public double billRate { get; set; }
+        public Int32 jobOrderStatusId { get; set; }
+        public string jobOrderStatus { get; set; }
+        public bool isActive { get; set; }
+        public Int32 positionsRequired { get; set; }
+        public Int32 positionsFilled { get; set; }
+        public Int64 customerId { get; set; }
+        public string customerName { get; set; }
+        public string departmentName { get; set; }
+        public Int32 jobOrderDurationId { get; set; }
+        public string jobOrderDuration { get; set; }
+        public string dateOrderTaken { get; set; }
+        public string startDate { get; set; }
+        public Int64? supervisorContactId { get; set; }
+        public string supervisorFirstName { get; set; }
+        public string supervisorLastName { get; set; }
+        public Int32? supervisorOfficePhoneCountryCallingCode { get; set; }
+        public string supervisorOfficePhone { get; set; }
+        public bool doNotAutoClose { get; set; }
+        public bool usesTimeClock { get; set; }
+        public bool usesPeopleNet { get; set; }
+        public string notes { get; set; }
+        public string alternateJobOrderId { get; set; }
+        public string dressCode { get; set; }
+        public string safetyNotes { get; set; }
+        public string directions { get; set; }
+        public Int32? serviceRepId { get; set; }
+        public string serviceRep { get; set; }
+        public Int32? salesTeamId { get; set; }
+        public string salesTeam { get; set; }
+        public string publicJobTitle { get; set; }
+        public string publicJobDescription { get; set; }
+        public string publicPostingDate { get; set; }
+        public bool doNotPostPublicly { get; set; }
+        public string publicJobDescriptionContentType { get; set; }
+        public string publicEducationSummary { get; set; }
+        public string publicExperienceSummary { get; set; }
+        public string publicReplyEmail { get; set; }
+        public string applyToCustomUrl { get; set; }
+        public string applyToHrCenterProductInstanceId { get; set; }
+        public string applyToHrCenterProductInstanceName { get; set; }
+        public Int32? applyToHrCenterWorkflowId { get; set; }
+        public string applyToHrCenterWorkflowName { get; set; }
+        public string howToApply { get; set; }
+        public string utmCampaign { get; set; }
+        public string payDescription { get; set; }
+        public string expireDateTime { get; set; }
+    }
+
+    public class Department
+    {
+        public Int64 customerId { get; set; }
+        public bool isActive { get; set; }
+        public string customerName { get; set; }
+        public string departmentName { get; set; }
+        public Int32? supervisorContactId { get; set; }
+        public string supervisorFirstName { get; set; }
+        public string supervisorLastName { get; set; }
+        public string customerStatus { get; set; }
+        public string customerStatusId { get; set; }
+        public Int32 branchId { get; set; }
+        public string branch { get; set; }
+        public bool hasDepartments { get; set; }
+        public Department[] departments { get; set; }
+    
     }
 }
     

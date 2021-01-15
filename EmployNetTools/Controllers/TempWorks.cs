@@ -9,7 +9,7 @@ using EmployNetTools.DataLayer.Models.TempWorks;
 using EmployNetTools.DataLayer;
 using Microsoft.EntityFrameworkCore;
 using System.Data.SqlClient;
-using DataLayer;
+
 
 //using FromBodyAttribute = System.Web.Http.FromBodyAttribute;
 
@@ -29,6 +29,39 @@ namespace EmployNetTools.Controllers
             _context = context;
         }
 
+
+        [HttpGet]
+        [ActionName("GetJobOrders")]
+        public async Task<IActionResult> GetJobOrders()
+        {
+            string conStr = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
+
+            using (SqlConnection con = new SqlConnection(conStr))
+            {
+                con.Open();
+                try
+                { 
+                    JobOrders jobs = await TempWorksAPI.SearchJobOrdersFromTempworksAsync();
+                    foreach (JobOrder job in jobs.data)
+                    {
+                        try { 
+                            JobDetail detail = await TempWorksAPI.GetJobOrderDetailFromTempworksAsync(job.orderId);
+                            DataLayer.TempWorks.AddJobOrderProc(con, detail, true);
+                        }
+                        catch(Exception ex)
+                        {
+                            _context.SaveErrorProc(con, "Error JobOrder " + job.orderId.ToString(), ex.Message);
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    _context.SaveErrorProc(con, "Error JobOrder", ex.Message);
+                    return BadRequest(ex.Message);
+                }
+            }
+            return Ok();
+        }
 
         [HttpGet]
         [ActionName("GetEmployeeDocs")]
@@ -261,7 +294,7 @@ namespace EmployNetTools.Controllers
 
                     foreach (Customer c in models.data)
                     {
-                        DataLayer.TempWorks.AddCustomerProc(con, c, false);
+                        DataLayer.TempWorks.AddCustomerProc(con, c, 0, false);
                     }
                 }
                 catch (Exception ex)
@@ -270,6 +303,42 @@ namespace EmployNetTools.Controllers
                 }
             }
             return Ok();
+        }
+
+
+        [HttpGet]
+        [ActionName("GetCustomerDepartments")]
+        public async Task<IActionResult> GetCustomerDepartments()
+        {
+            Customers custs = await TempWorksAPI.SearchCustomersFromTempworksAsync();
+
+            string conStr = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
+
+            using (SqlConnection con = new SqlConnection(conStr))
+            {
+
+                try
+                {
+                    con.Open();
+                    foreach(Customer cust in custs.data)
+                    {
+                        try
+                        {
+                            await DataLayer.TempWorks.AddDepartmentCustomerProc(con, null, cust.CustomerId, true);
+                        }
+                        catch (Exception ex)
+                        {
+                            _context.SaveErrorProc(con, "Error Updating Customer " + cust.CustomerId.ToString(), ex.Message);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _context.SaveErrorProc(con, "Error adding Departments", ex.Message);
+                    return BadRequest(ex.Message);
+                }
+            }
+                    return Ok();
         }
 
         [HttpGet]
@@ -292,7 +361,7 @@ namespace EmployNetTools.Controllers
                         try
                         {
                             Customer cust = await TempWorksAPI.GetCustomerFromTempworksAsync(c.CustomerId);
-                            DataLayer.TempWorks.AddCustomerProc(con, cust, true);
+                            DataLayer.TempWorks.AddCustomerProc(con, cust, 0, true);
                             _context.SaveErrorProc(con, "Updated Customer" + cust.CustomerId.ToString(), "");
                         }
                         catch (Exception ex)

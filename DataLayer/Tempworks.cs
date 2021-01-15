@@ -3,7 +3,7 @@ using System.Data.SqlClient;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
-using EmployNetTools.DataLayer.Models;
+using EmployNetTools.DataLayer;
 using EmployNetTools.DataLayer.Models.TempWorks;
 
 namespace EmployNetTools.DataLayer
@@ -21,13 +21,13 @@ namespace EmployNetTools.DataLayer
             {
                 cmd.Connection = con;
                 cmd.Parameters.Add(new SqlParameter("@street1", model.Street1));
-                cmd.Parameters.Add(new SqlParameter("@street2",  string.IsNullOrEmpty(model.Street2)?"":model.Street2));
+                cmd.Parameters.Add(new SqlParameter("@street2", string.IsNullOrEmpty(model.Street2) ? "" : model.Street2));
                 cmd.Parameters.Add(new SqlParameter("@postalCode", model.PostalCode));
                 cmd.Parameters.Add(new SqlParameter("@region", model.Region));
                 cmd.Parameters.Add(new SqlParameter("@municipality", model.Municipality));
-                cmd.Parameters.Add(new SqlParameter("@attentionTo", string.IsNullOrEmpty(model.AttentionTo)?"":model.AttentionTo));
+                cmd.Parameters.Add(new SqlParameter("@attentionTo", string.IsNullOrEmpty(model.AttentionTo) ? "" : model.AttentionTo));
                 cmd.Parameters.Add(new SqlParameter("@country", model.Country));
-                
+
                 cmd.CommandType = System.Data.CommandType.StoredProcedure;
                 cmd.CommandText = "prAddAddress";
                 var ret = cmd.ExecuteScalar();
@@ -70,7 +70,7 @@ namespace EmployNetTools.DataLayer
             return result.AddressId;
         }
 
-        public static bool AddCustomerProc(SqlConnection con, DataLayer.Models.TempWorks.Customer model, bool replace=false)
+        public static bool AddCustomerProc(SqlConnection con, DataLayer.Models.TempWorks.Customer model, Int64 customerId = 0, bool replace = false)
         {
             using (SqlCommand cmd = new SqlCommand())
             {
@@ -79,13 +79,13 @@ namespace EmployNetTools.DataLayer
                 cmd.Parameters.Add(new SqlParameter("@customerId", model.CustomerId));
                 cmd.Parameters.Add(new SqlParameter("@customerName", model.CustomerName));
                 cmd.Parameters.Add(new SqlParameter("@departmentName", model.DepartmentName));
-                cmd.Parameters.Add(new SqlParameter("@parentCustomerId", model.ParentCustomerId));
+                cmd.Parameters.Add(new SqlParameter("@parentCustomerId", customerId != 0 ? customerId : model.ParentCustomerId));
                 cmd.Parameters.Add(new SqlParameter("@rootCustomerId", model.RootCustomerId));
                 cmd.Parameters.Add(new SqlParameter("@branchId", model.BranchId));
                 cmd.Parameters.Add(new SqlParameter("@branchName", model.BranchName));
                 cmd.Parameters.Add(new SqlParameter("@customerStatusId", model.CustomerStatusId));
                 cmd.Parameters.Add(new SqlParameter("@customerStatus", model.CustomerStatus));
-                cmd.Parameters.Add(new SqlParameter("@website", String.IsNullOrEmpty(model.Website)?"":model.Website));
+                cmd.Parameters.Add(new SqlParameter("@website", String.IsNullOrEmpty(model.Website) ? "" : model.Website));
                 cmd.Parameters.Add(new SqlParameter("@isActive", model.IsActive));
                 cmd.Parameters.Add(new SqlParameter("@dateActivated", DateTime.Parse(String.IsNullOrEmpty(model.DateActivated) ? "01/01/1900" : model.DateActivated)));
                 cmd.Parameters.Add(new SqlParameter("@worksiteId", model.WorksiteId));
@@ -151,11 +151,11 @@ namespace EmployNetTools.DataLayer
 
             result.BranchId = model.BranchId;
             result.BranchName = model.BranchName;
-            
 
 
 
-            if(addRec)
+
+            if (addRec)
                 context.Customer.Add(result);
             else
                 context.Customer.Update(result);
@@ -167,10 +167,10 @@ namespace EmployNetTools.DataLayer
 
         }
 
-  
+
         public static void AddEmployeeProc(SqlConnection con, Employee model, bool replace = false)
         {
-            using (SqlCommand  cmd = new SqlCommand())
+            using (SqlCommand cmd = new SqlCommand())
             {
                 cmd.Connection = con;
                 cmd.Parameters.Add(new SqlParameter("@override", replace == false ? 0 : 1));
@@ -191,7 +191,7 @@ namespace EmployNetTools.DataLayer
                 cmd.Parameters.Add(new SqlParameter("@activationDate", DateTime.Parse(String.IsNullOrEmpty(model.activationDate) ? "01/01/1900" : model.activationDate)));
                 cmd.Parameters.Add(new SqlParameter("@deactivationDate", DateTime.Parse(String.IsNullOrEmpty(model.deactivationDate) ? "01/01/1900" : model.deactivationDate)));
                 cmd.Parameters.Add(new SqlParameter("@hasResumeOnFile", model.hasResumeOnFile));
-                cmd.Parameters.Add(new SqlParameter("@resumeDocumentId", String.IsNullOrEmpty(model.resumeDocumentId)?0:Convert.ToInt32(model.resumeDocumentId)));
+                cmd.Parameters.Add(new SqlParameter("@resumeDocumentId", String.IsNullOrEmpty(model.resumeDocumentId) ? 0 : Convert.ToInt32(model.resumeDocumentId)));
                 cmd.Parameters.Add(new SqlParameter("@resumeFileName", model.resumeFileName));
                 cmd.Parameters.Add(new SqlParameter("@postalCode", model.postalCode));
                 cmd.Parameters.Add(new SqlParameter("@i9ExpirationDate", DateTime.Parse(String.IsNullOrEmpty(model.i9ExpirationDate) ? "01/01/1900" : model.i9ExpirationDate)));
@@ -218,7 +218,7 @@ namespace EmployNetTools.DataLayer
                 int add = 0;
 
                 if (model.address != null)
-                { 
+                {
                     Address addy = new Address
                     {
                         Street1 = model.address.Street1,
@@ -233,7 +233,7 @@ namespace EmployNetTools.DataLayer
                     add = DataLayer.TempWorks.AddAddressProc(con, addy);
                 }
                 cmd.Parameters.Add(new SqlParameter("@addressId", add));
-                
+
 
 
                 cmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -312,7 +312,7 @@ namespace EmployNetTools.DataLayer
                 cmd.Parameters.Add(new SqlParameter("@supervisor", model.supervisor));
                 cmd.Parameters.Add(new SqlParameter("@supervisorContactInfo", model.supervisorContactInfo));
                 cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                
+
                 cmd.CommandText = "prAddAssignment";
                 int count = cmd.ExecuteNonQuery();
 
@@ -342,7 +342,7 @@ namespace EmployNetTools.DataLayer
             result.departmentName = model.departmentName;
             result.employeeId = model.employeeId;
             result.endDate = DateTime.Parse(String.IsNullOrEmpty(model.endDate) ? "01/01/1900" : model.endDate);
-            result.expectedEndDate = DateTime.Parse(String.IsNullOrEmpty(model.expectedEndDate)?"01/01/1900":model.expectedEndDate);
+            result.expectedEndDate = DateTime.Parse(String.IsNullOrEmpty(model.expectedEndDate) ? "01/01/1900" : model.expectedEndDate);
             result.firstName = model.firstName;
             result.isActive = model.isActive;
             result.isDeleted = model.isDeleted;
@@ -351,10 +351,10 @@ namespace EmployNetTools.DataLayer
             result.jobTitle = model.jobTitle;
             result.lastName = model.lastName;
             result.middleName = model.middleName;
-            result.originalStartDate = DateTime.Parse(String.IsNullOrEmpty(model.originalStartDate)?"01/01/1900":model.originalStartDate);
+            result.originalStartDate = DateTime.Parse(String.IsNullOrEmpty(model.originalStartDate) ? "01/01/1900" : model.originalStartDate);
             result.payRate = Convert.ToDecimal(model.payRate);
             result.performanceNote = model.performanceNote;
-            result.startDate = DateTime.Parse(String.IsNullOrEmpty(model.startDate)?"01/01/1900":model.startDate);
+            result.startDate = DateTime.Parse(String.IsNullOrEmpty(model.startDate) ? "01/01/1900" : model.startDate);
             result.supervisor = model.supervisor;
             result.supervisorContactInfo = model.supervisorContactInfo;
 
@@ -363,7 +363,7 @@ namespace EmployNetTools.DataLayer
             else
                 context.Assignment.Update(result);
 
-      //      context.SaveChanges();
+            //      context.SaveChanges();
 
             return true;
         }
@@ -372,10 +372,10 @@ namespace EmployNetTools.DataLayer
         {
             Models.TempWorksDB.Branch result = context.Branch.FirstOrDefault(result => result.BranchId == model.BranchId);
             bool addRec = false;
-            if(result==null)
+            if (result == null)
             {
                 addRec = true;
-                result = new Models.TempWorksDB.Branch(); 
+                result = new Models.TempWorksDB.Branch();
             }
 
             result.BranchId = model.BranchId;
@@ -398,7 +398,7 @@ namespace EmployNetTools.DataLayer
                 AttentionTo = model.Address.AttentionTo
             };
 
-            result.AddressId = AddAddress(context,add);
+            result.AddressId = AddAddress(context, add);
 
             if (addRec)
                 context.Branch.Add(result);
@@ -437,5 +437,109 @@ namespace EmployNetTools.DataLayer
 
             return false;
         }
+
+
+        public static bool AddJobOrderProc(SqlConnection con, DataLayer.Models.TempWorks.JobDetail model, bool replace = false)
+        {
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = con;
+                cmd.Parameters.Add(new SqlParameter("@override", replace == false ? 0 : 1));
+                cmd.Parameters.Add(new SqlParameter("@jobOrderId", model.jobOrderId));
+                cmd.Parameters.Add(new SqlParameter("@branchId", model.branchId));
+                cmd.Parameters.Add(new SqlParameter("@branch", model.branch));
+                cmd.Parameters.Add(new SqlParameter("@jobOrderTypeId", model.jobOrderTypeId));
+                cmd.Parameters.Add(new SqlParameter("@jobOrderType", model.jobOrderType));
+                cmd.Parameters.Add(new SqlParameter("@jobTitleId", model.jobTitleId));
+                cmd.Parameters.Add(new SqlParameter("@jobTitle", model.jobTitle));
+                cmd.Parameters.Add(new SqlParameter("@jobDescription", model.jobDescription));
+                cmd.Parameters.Add(new SqlParameter("@payRate", model.payRate));
+                cmd.Parameters.Add(new SqlParameter("@billRate", model.billRate));
+                cmd.Parameters.Add(new SqlParameter("@jobOrderStatusId", model.jobOrderStatusId));
+                cmd.Parameters.Add(new SqlParameter("@jobOrderStatus", model.jobOrderStatus));
+                cmd.Parameters.Add(new SqlParameter("@isActive", model.isActive));
+                cmd.Parameters.Add(new SqlParameter("@positionsRequired", model.positionsRequired));
+                cmd.Parameters.Add(new SqlParameter("@positionsFilled", model.positionsFilled));
+                cmd.Parameters.Add(new SqlParameter("@customerId", model.customerId));
+                cmd.Parameters.Add(new SqlParameter("@customerName", model.customerName));
+                cmd.Parameters.Add(new SqlParameter("@departmentName", model.departmentName));
+                cmd.Parameters.Add(new SqlParameter("@jobOrderDurationId", model.jobOrderDurationId));
+                cmd.Parameters.Add(new SqlParameter("@jobOrderDuration", model.jobOrderDurationId));
+                cmd.Parameters.Add(new SqlParameter("@dateOrderTaken", DateTime.Parse(String.IsNullOrEmpty(model.dateOrderTaken) ? "01/01/1900" : model.dateOrderTaken)));
+                cmd.Parameters.Add(new SqlParameter("@startDate", DateTime.Parse(String.IsNullOrEmpty(model.startDate) ? "01/01/1900" : model.startDate)));
+                cmd.Parameters.Add(new SqlParameter("@supervisorContactId", model.supervisorContactId));
+                cmd.Parameters.Add(new SqlParameter("@supervisorFirstName", model.supervisorFirstName));
+                cmd.Parameters.Add(new SqlParameter("@supervisorLastName", model.supervisorLastName));
+                cmd.Parameters.Add(new SqlParameter("@supervisorOfficePhoneCountryCallingCode", model.supervisorOfficePhoneCountryCallingCode));
+                cmd.Parameters.Add(new SqlParameter("@supervisorOfficePhone", model.supervisorOfficePhone));
+                cmd.Parameters.Add(new SqlParameter("@doNotAutoClose", model.doNotAutoClose));
+                cmd.Parameters.Add(new SqlParameter("@usesTimeClock", model.usesTimeClock));
+                cmd.Parameters.Add(new SqlParameter("@usesPeopleNet", model.usesPeopleNet));
+                cmd.Parameters.Add(new SqlParameter("@notes", model.notes));
+                cmd.Parameters.Add(new SqlParameter("@alternateJobOrderId", model.alternateJobOrderId));
+                cmd.Parameters.Add(new SqlParameter("@dressCode", model.dressCode));
+                cmd.Parameters.Add(new SqlParameter("@safetyNotes", model.safetyNotes));
+                cmd.Parameters.Add(new SqlParameter("@directions", model.directions));
+                cmd.Parameters.Add(new SqlParameter("@serviceRepId", model.serviceRepId));
+                cmd.Parameters.Add(new SqlParameter("@serviceRep", model.serviceRep));
+                cmd.Parameters.Add(new SqlParameter("@salesTeamId", model.salesTeamId));
+                cmd.Parameters.Add(new SqlParameter("@salesTeam", model.salesTeam));
+                cmd.Parameters.Add(new SqlParameter("@publicJobTitle", model.publicJobTitle));
+                cmd.Parameters.Add(new SqlParameter("@publicJobDescription", model.publicJobDescription));
+                cmd.Parameters.Add(new SqlParameter("@publicPostingDate", DateTime.Parse(String.IsNullOrEmpty(model.publicPostingDate) ? "01/01/1900" : model.publicPostingDate)));
+                cmd.Parameters.Add(new SqlParameter("@doNotPostPublicly", model.doNotPostPublicly));
+                cmd.Parameters.Add(new SqlParameter("@publicJobDescriptionContentType", model.publicJobDescriptionContentType));
+                cmd.Parameters.Add(new SqlParameter("@publicEducationSummary", model.publicEducationSummary));
+                cmd.Parameters.Add(new SqlParameter("@publicExperienceSummary", model.publicExperienceSummary));
+                cmd.Parameters.Add(new SqlParameter("@publicReplyEmail", model.publicReplyEmail));
+                cmd.Parameters.Add(new SqlParameter("@applyToCustomUrl", model.applyToCustomUrl));
+                cmd.Parameters.Add(new SqlParameter("@applyToHrCenterProductInstanceId", model.applyToHrCenterProductInstanceId));
+                cmd.Parameters.Add(new SqlParameter("@applyToHrCenterProductInstanceName", model.applyToHrCenterProductInstanceName));
+                cmd.Parameters.Add(new SqlParameter("@applyToHrCenterWorkflowId", model.applyToHrCenterWorkflowId));
+                cmd.Parameters.Add(new SqlParameter("@applyToHrCenterWorkflowName", model.applyToHrCenterWorkflowName));
+                cmd.Parameters.Add(new SqlParameter("@howToApply", model.howToApply));
+                cmd.Parameters.Add(new SqlParameter("@utmCampaign", model.utmCampaign));
+                cmd.Parameters.Add(new SqlParameter("@payDescription", model.payDescription));
+                cmd.Parameters.Add(new SqlParameter("@expireDateTime", DateTime.Parse(String.IsNullOrEmpty(model.expireDateTime) ? "01/01/1900" : model.expireDateTime)));
+
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.CommandText = "prAddJobOrder";
+                cmd.ExecuteNonQuery();
+
+            }
+            return true;
+        }
+        public static async System.Threading.Tasks.Task<bool> AddDepartmentCustomerProc(SqlConnection con, DataLayer.Models.TempWorks.Department model, Int64 CustomerId = 0, bool replace = false)
+        {
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = con;
+                // get the customer details and save
+                if (model == null)
+                {
+                    try
+                    {
+                        model = await TempWorksAPI.GetCustomerDepartmentFromTempworksAsync(CustomerId);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception(ex.Message);
+                    }
+                }
+                if (model.departments != null)
+                {
+                    foreach (Department dep in model.departments)
+                    {
+                        Customer cust = await TempWorksAPI.GetCustomerFromTempworksAsync(dep.customerId);
+                        AddCustomerProc(con, cust, model.customerId, true);
+                        await AddDepartmentCustomerProc(con, dep, dep.customerId, true);
+                    }
+                }
+                return true;
+            }
+
+            return true;
+        }
     }
+
 }
