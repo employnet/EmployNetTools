@@ -12,13 +12,14 @@ namespace EmployNetTools.DataLayer
 {
     public class TempWorksAPI
     {
+        const string APIKey = "OTZmZGNkOWNmZWJlNGI4MDhlYzAxOGNmMzYyYmZiNWE6M2Q2MWUyNDJlYzUwNDI1Njk1OGZlZTNhOTQyNzE5Mjg=";
 
         public static async System.Threading.Tasks.Task<Customers> SearchCustomersFromTempworksAsync()
         {
             using (HttpClient client = new HttpClient())
             {
                 // Call asynchronous network methods in a try/catch block to handle exceptions
-                client.DefaultRequestHeaders.Add("x-tw-token", "OTZmZGNkOWNmZWJlNGI4MDhlYzAxOGNmMzYyYmZiNWE6M2Q2MWUyNDJlYzUwNDI1Njk1OGZlZTNhOTQyNzE5Mjg=");
+                client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
                 var result = await client.GetAsync("https://api.ontempworks.com/search/customers/?skip=0&take=100000");
 
                 //if(result.StatusCode!=System.Net.HttpStatusCode.OK)
@@ -188,6 +189,27 @@ namespace EmployNetTools.DataLayer
 
         }
 
+        public static async System.Threading.Tasks.Task<User> GetUserFromTempworksAsync(int id)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                // Call asynchronous network methods in a try/catch block to handle exceptions
+                client.DefaultRequestHeaders.Add("x-tw-token", "OTZmZGNkOWNmZWJlNGI4MDhlYzAxOGNmMzYyYmZiNWE6M2Q2MWUyNDJlYzUwNDI1Njk1OGZlZTNhOTQyNzE5Mjg=");
+                var result = await client.GetAsync("https://api.ontempworks.com/users/" + id.ToString());
+
+                //if(result.StatusCode!=System.Net.HttpStatusCode.OK)
+                //throw new Exception(result.Content.)
+                //string contnet = await result.Content.ReadAsStringAsync();
+                User user = await result.Content.ReadFromJsonAsync<User>();
+
+
+                // Above three lines can be replaced with new helper method below
+                // string responseBody = await client.GetStringAsync(uri);
+
+                return user;
+            }
+
+        }
 
     }
 }

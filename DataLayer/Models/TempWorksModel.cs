@@ -47,7 +47,7 @@ namespace EmployNetTools.DataLayer.Models.TempWorks
 
         public Address BillingAddress { get; set; }
 
-        public int WorksiteId { get; set; }
+        public int? WorksiteId { get; set; }
 
         public string WorksiteName { get; set; }
 
@@ -325,6 +325,33 @@ namespace EmployNetTools.DataLayer.Models.TempWorks
         public bool hasDepartments { get; set; }
         public Department[] departments { get; set; }
     
+    }
+
+    public class User
+    {
+        public Int32 srIdent { get; set; }
+        public string repFullName { get; set; }
+        public string chatName { get; set; }
+        public string email { get; set; }
+        public string companyFullName { get; set; }
+        public Int32 branchId { get; set; }
+        public string branchFullName { get; set; }
+        public Int32 branchCountryCode { get; set; }
+        public bool isPermissionAdmin { get; set; }
+        public string ianaTimeZone { get; set; }
+        public Int32 dateFormatId { get; set; }
+        public string microsoftDateFormat { get; set; }
+        public string microsoftLongDateFormat { get; set; }
+        public string momentDateFormat { get; set; }
+        public string momentLongDateFormat { get; set; }
+        public Int32 timeFormatId { get; set; }
+        public string microsoftTimeFormat { get; set; }
+        public string momentTimeFormat { get; set; }
+        public string localeId { get; set; }
+        public string locale { get; set; }
+        public string twUniqueId { get; set; }
+        public bool isTempWorksEmployee { get; set; }
+
     }
 }
     

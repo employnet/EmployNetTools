@@ -10,6 +10,11 @@ namespace EmployNetTools.DataLayer.Models.TempWorksDB
 
     }
 
+    public class RepUserId
+    {
+        [Key]
+        public int srIdent { get; set; }
+    }
     public class CustomerList
     {
         [Key]

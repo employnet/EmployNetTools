@@ -278,6 +278,39 @@ namespace EmployNetTools.DataLayer
 
         }
 
+        public static void AddRepUserProc(SqlConnection con, User model)
+        {
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = con;
+                cmd.Parameters.Add(new SqlParameter("@srIdent", model.srIdent));
+                cmd.Parameters.Add(new SqlParameter("@repFullName", model.repFullName));
+                cmd.Parameters.Add(new SqlParameter("@chatName", String.IsNullOrEmpty(model.chatName)?"":model.chatName)) ;
+                cmd.Parameters.Add(new SqlParameter("@email", model.email));
+                cmd.Parameters.Add(new SqlParameter("@companyFullName", model.companyFullName));
+                cmd.Parameters.Add(new SqlParameter("@branchId", model.branchId));
+                cmd.Parameters.Add(new SqlParameter("@branchFullName", model.branchFullName));
+                cmd.Parameters.Add(new SqlParameter("@branchCountryCode", model.branchCountryCode));
+                cmd.Parameters.Add(new SqlParameter("@isPermissionAdmin", model.isPermissionAdmin));
+                cmd.Parameters.Add(new SqlParameter("@ianaTimeZone", String.IsNullOrEmpty(model.ianaTimeZone) ? "":model.ianaTimeZone)) ;
+                cmd.Parameters.Add(new SqlParameter("@dateFormatId", model.dateFormatId));
+                cmd.Parameters.Add(new SqlParameter("@microsoftDateFormat", model.microsoftDateFormat));
+                cmd.Parameters.Add(new SqlParameter("@microsoftLongDateFormat", model.microsoftLongDateFormat));
+                cmd.Parameters.Add(new SqlParameter("@momentDateFormat", model.momentDateFormat));
+                cmd.Parameters.Add(new SqlParameter("@momentLongDateFormat", model.momentLongDateFormat));
+                cmd.Parameters.Add(new SqlParameter("@timeFormatId", model.timeFormatId));
+                cmd.Parameters.Add(new SqlParameter("@microsoftTimeFormat", model.microsoftTimeFormat));
+                cmd.Parameters.Add(new SqlParameter("@momentTimeFormat", model.momentTimeFormat));
+                cmd.Parameters.Add(new SqlParameter("@localeId", model.localeId));
+                cmd.Parameters.Add(new SqlParameter("@locale", model.locale));
+                cmd.Parameters.Add(new SqlParameter("@twUniqueId", model.twUniqueId));
+                cmd.Parameters.Add(new SqlParameter("@isTempWorksEmployee", model.isTempWorksEmployee));
+                
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.CommandText = "prAddRepUser";
+                int count = cmd.ExecuteNonQuery();
+            }
+        }
         public static void AddAssignmentProc(SqlConnection con, Assignment model)
         {
             using (SqlCommand cmd = new SqlCommand())

@@ -22,6 +22,7 @@ namespace EmployNetTools.Controllers
     public class TempWorks : ControllerBase
     {
         private readonly DataSurfContext _context;
+        private readonly string ConnectionString = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
 
         public TempWorks(DataSurfContext context)
         {
@@ -339,6 +340,26 @@ namespace EmployNetTools.Controllers
                 }
             }
                     return Ok();
+        }
+
+        [HttpGet]
+        [ActionName("GetUsers")]
+        public async Task<IActionResult> GetRepUsers()
+        {
+
+            string conStr = ConnectionString;
+            using (SqlConnection con = new SqlConnection(conStr))
+            {
+                con.Open();
+                var users = _context.GetUsersListAsync().Result;
+                foreach (DataLayer.Models.TempWorksDB.RepUserId rep in users)
+                {
+                    User u = await TempWorksAPI.GetUserFromTempworksAsync(rep.srIdent);
+                    DataLayer.TempWorks.AddRepUserProc(con, u);
+
+                }
+            }
+            return Ok();
         }
 
         [HttpGet]

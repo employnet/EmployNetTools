@@ -40,7 +40,9 @@ namespace EmployNetTools.DataLayer
         public DbSet<Models.TempWorksDB.EmployeeAllList> EmployeeAllList { get; set; }
 
         public DbSet<Models.TempWorksDB.CustomerList> CustomerList { get; set; }
+        public DbSet<Models.EmploynetDB.LoginAccount> Login { get; set; }
 
+        public DbSet<Models.TempWorksDB.RepUserId> RepUserList { get; set; }
 
         public async System.Threading.Tasks.Task<Models.TempWorksDB.CustomerList[]> GetCustomerListAsync()
         {
@@ -91,6 +93,11 @@ namespace EmployNetTools.DataLayer
 
             }
 
+        }
+
+        public async System.Threading.Tasks.Task<Models.TempWorksDB.RepUserId[]> GetUsersListAsync()
+        {
+            return await RepUserList.ToArrayAsync();
         }
     }
 
