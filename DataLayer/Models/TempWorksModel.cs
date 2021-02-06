@@ -210,7 +210,7 @@ namespace EmployNetTools.DataLayer.Models.TempWorks
     public class Documents
     {
         public Document[] data { get; set; }
-        public int count { get; set; }
+        public int totalCount { get; set; }
     }
 
     public class Document
@@ -351,6 +351,45 @@ namespace EmployNetTools.DataLayer.Models.TempWorks
         public string locale { get; set; }
         public string twUniqueId { get; set; }
         public bool isTempWorksEmployee { get; set; }
+
+    }
+
+    public class WorkSite
+    {
+        public Int32 worksiteId { get; set; }
+        public string worksiteName { get; set; }
+        public bool isActive { get; set; }
+        public Int64 customerId { get; set; }
+        public string customerName { get; set; }
+        public string departmentName { get; set; }
+        public Address address { get; set; }
+        
+        public string directions { get; set; }
+        public string dressCode { get; set; }
+        public string timeClockTimeZoneId { get; set; }
+        public string timeClockTimeZone { get; set; }
+        public bool? isDaylightSavingsTimeObserved { get; set; }
+        public bool? isPublicTransportationAccessible	{ get; set; }
+    }
+
+    public class EEO     
+        {
+
+        public int EmployeeId { get; set; }
+	    public string birthPlace { get; set; }
+        public string dateEntered { get; set; }
+	    public string dateOfBirth { get; set; }
+	    public string gender { get; set; }
+        public Int32? genderId { get; set; }
+        public string i9DateVerified { get; set; }
+        public bool? isCitizen { get; set; }
+
+        public bool? isDisabled { get; set; }
+        public bool? isEVerified { get; set; }
+        public string nationality { get; set; }
+        public Int32? nationalityId { get; set; }
+        public string veteranStatus { get; set; }
+        public Int32? veteranStatusId { get; set; }
 
     }
 }

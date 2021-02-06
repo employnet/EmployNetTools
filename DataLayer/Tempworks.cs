@@ -11,6 +11,36 @@ namespace EmployNetTools.DataLayer
     public class TempWorks
     {
 
+        public static bool AddEEOProc(SqlConnection con, DataLayer.Models.TempWorks.EEO model)
+        {
+
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = con;
+                cmd.Parameters.Add(new SqlParameter("@EmployeeId", model.EmployeeId));
+                cmd.Parameters.Add(new SqlParameter("@birthplace", model.birthPlace));
+                cmd.Parameters.Add(new SqlParameter("@dateEntered", DateTime.Parse(String.IsNullOrEmpty(model.dateEntered) ? "01/01/1900" : model.dateEntered)));
+                cmd.Parameters.Add(new SqlParameter("@dateOfBirth", DateTime.Parse(String.IsNullOrEmpty(model.dateOfBirth) ? "01/01/1900" : model.dateOfBirth)));
+                cmd.Parameters.Add(new SqlParameter("@gender", model.gender));
+                cmd.Parameters.Add(new SqlParameter("@genderId", model.genderId));
+                cmd.Parameters.Add(new SqlParameter("@i9DateVerified", DateTime.Parse(String.IsNullOrEmpty(model.i9DateVerified) ? "01/01/1900" : model.i9DateVerified)));
+                cmd.Parameters.Add(new SqlParameter("@isCitizen", model.isCitizen));
+                cmd.Parameters.Add(new SqlParameter("@isDisabled", model.isDisabled));
+                cmd.Parameters.Add(new SqlParameter("@isEVerified", model.isEVerified));
+                cmd.Parameters.Add(new SqlParameter("@nationality", model.nationality));
+                cmd.Parameters.Add(new SqlParameter("@nationalityId", model.nationalityId));
+                cmd.Parameters.Add(new SqlParameter("@veteranStatus", model.veteranStatus));
+                cmd.Parameters.Add(new SqlParameter("@veteranStatusId", model.veteranStatusId));
+
+
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.CommandText = "prAddEEO";
+                cmd.ExecuteNonQuery();
+            }
+
+            return true;
+        }
+
         public static int AddAddressProc(SqlConnection con, DataLayer.Models.TempWorks.Address model)
         {
             if (String.IsNullOrEmpty(model.Street1)) return 0;
@@ -444,6 +474,42 @@ namespace EmployNetTools.DataLayer
             return true;
         }
 
+
+        public static bool AddWorkSiteProc(SqlConnection con, WorkSite model, int addressID)
+        {
+            using(SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = con;
+                cmd.Parameters.Add(new SqlParameter("@WorkSiteId", model.worksiteId));
+
+                cmd.Parameters.Add(new SqlParameter("@WorkSiteName", model.worksiteName));
+
+                cmd.Parameters.Add(new SqlParameter("@isActive", model.isActive));
+
+                cmd.Parameters.Add(new SqlParameter("@CustomerId", model.customerId));
+
+                cmd.Parameters.Add(new SqlParameter("@DepartmentName", model.departmentName));
+
+                cmd.Parameters.Add(new SqlParameter("@AddressID", addressID));
+
+                cmd.Parameters.Add(new SqlParameter("@Directions", model.directions));
+
+                cmd.Parameters.Add(new SqlParameter("@DressCode", model.dressCode));
+
+                cmd.Parameters.Add(new SqlParameter("@TimeClockTimeZoneId", model.timeClockTimeZoneId));
+            
+
+                cmd.Parameters.Add(new SqlParameter("@isDaylightSavingsTimeObserved", model.isDaylightSavingsTimeObserved));
+
+                cmd.Parameters.Add(new SqlParameter("@isPublicTransportationAccessible", model.isPublicTransportationAccessible));
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.CommandText = "prAddWOrkSite";
+                int count = cmd.ExecuteNonQuery();
+
+            }
+            return true;
+        }
+
         public static bool AddDocumentProc(SqlConnection con, int EmployeeId, Document model)
         {
             using (SqlCommand cmd = new SqlCommand())
@@ -566,6 +632,7 @@ namespace EmployNetTools.DataLayer
                         Customer cust = await TempWorksAPI.GetCustomerFromTempworksAsync(dep.customerId);
                         AddCustomerProc(con, cust, model.customerId, true);
                         await AddDepartmentCustomerProc(con, dep, dep.customerId, true);
+
                     }
                 }
                 return true;

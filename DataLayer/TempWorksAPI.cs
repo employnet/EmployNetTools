@@ -12,7 +12,22 @@ namespace EmployNetTools.DataLayer
 {
     public class TempWorksAPI
     {
-        const string APIKey = "OTZmZGNkOWNmZWJlNGI4MDhlYzAxOGNmMzYyYmZiNWE6M2Q2MWUyNDJlYzUwNDI1Njk1OGZlZTNhOTQyNzE5Mjg=";
+        const string APIKey = "ZWU2Yzk2ODU0ZmYyNGRlMDgwMWMxOTFjNjM0Njg5YjI6YzU4N2ZhM2NhNDdmNGEyY2IxOGEyNDdjNTAwMzI5ZDI=";
+
+        public static async System.Threading.Tasks.Task<EEO> GetEmployeeEEOFromTempworksAsync(int id)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                // Call asynchronous network methods in a try/catch block to handle exceptions
+                client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
+                var result = await client.GetAsync("https://api.ontempworks.com/Employees/"+ id.ToString() + "/eeo");
+
+                EEO custs = await result.Content.ReadFromJsonAsync<EEO>();
+
+                return custs;
+            }
+
+        }
 
         public static async System.Threading.Tasks.Task<Customers> SearchCustomersFromTempworksAsync()
         {
@@ -20,29 +35,43 @@ namespace EmployNetTools.DataLayer
             {
                 // Call asynchronous network methods in a try/catch block to handle exceptions
                 client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
-                var result = await client.GetAsync("https://api.ontempworks.com/search/customers/?skip=0&take=100000");
+                var result = await client.GetAsync("https://api.ontempworks.com/search/customers/?skip=0&take=100000&includeDepartments=true");
 
-                //if(result.StatusCode!=System.Net.HttpStatusCode.OK)
-                //throw new Exception(result.Content.)
-                //string contnet = await result.Content.ReadAsStringAsync();
                 Customers custs = await result.Content.ReadFromJsonAsync<Customers>();
 
-
-                // Above three lines can be replaced with new helper method below
-                // string responseBody = await client.GetStringAsync(uri);
 
                 return custs;
             }
 
         }
 
+        public static async System.Threading.Tasks.Task<Assignments> SearchAssignmentFromTempworksAsync()
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                // Call asynchronous network methods in a try/catch block to handle exceptions
+                client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
+                var result = await client.GetAsync("https://api.ontempworks.com/search/assignments/?skip=0&take=100000&IsActive=true");
 
+                //if(result.StatusCode!=System.Net.HttpStatusCode.OK)
+                //throw new Exception(result.Content.)
+                //string contnet = await result.Content.ReadAsStringAsync();
+                Assignments ret = await result.Content.ReadFromJsonAsync<Assignments>();
+
+
+                // Above three lines can be replaced with new helper method below
+                // string responseBody = await client.GetStringAsync(uri);
+
+                return ret;
+            }
+
+        }
         public static async System.Threading.Tasks.Task<JobOrders> SearchJobOrdersFromTempworksAsync()
         {
             using (HttpClient client = new HttpClient())
             {
                 // Call asynchronous network methods in a try/catch block to handle exceptions
-                client.DefaultRequestHeaders.Add("x-tw-token", "OTZmZGNkOWNmZWJlNGI4MDhlYzAxOGNmMzYyYmZiNWE6M2Q2MWUyNDJlYzUwNDI1Njk1OGZlZTNhOTQyNzE5Mjg=");
+                client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
                 var result = await client.GetAsync("https://api.ontempworks.com/search/joborders/?skip=0&take=100000");
 
                 //if(result.StatusCode!=System.Net.HttpStatusCode.OK)
@@ -64,7 +93,7 @@ namespace EmployNetTools.DataLayer
             using (HttpClient client = new HttpClient())
             {
                 // Call asynchronous network methods in a try/catch block to handle exceptions
-                client.DefaultRequestHeaders.Add("x-tw-token", "OTZmZGNkOWNmZWJlNGI4MDhlYzAxOGNmMzYyYmZiNWE6M2Q2MWUyNDJlYzUwNDI1Njk1OGZlZTNhOTQyNzE5Mjg=");
+                client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
                 HttpResponseMessage result;
                 try
                 {
@@ -105,7 +134,7 @@ namespace EmployNetTools.DataLayer
         {
             using (HttpClient client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Add("x-tw-token", "OTZmZGNkOWNmZWJlNGI4MDhlYzAxOGNmMzYyYmZiNWE6M2Q2MWUyNDJlYzUwNDI1Njk1OGZlZTNhOTQyNzE5Mjg=");
+                client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
                 var result = await client.GetAsync("https://api.ontempworks.com/customers/" + id.ToString() + "/departments?limittodirectdepartments=false&includeinactivedepartments=true");
 
 
@@ -124,7 +153,7 @@ namespace EmployNetTools.DataLayer
             using (HttpClient client = new HttpClient())
             {
                 // Call asynchronous network methods in a try/catch block to handle exceptions
-                client.DefaultRequestHeaders.Add("x-tw-token", "OTZmZGNkOWNmZWJlNGI4MDhlYzAxOGNmMzYyYmZiNWE6M2Q2MWUyNDJlYzUwNDI1Njk1OGZlZTNhOTQyNzE5Mjg=");
+                client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
                 var result = await client.GetAsync("https://api.ontempworks.com/customers/" + id.ToString());
 
                 //if(result.StatusCode!=System.Net.HttpStatusCode.OK)
@@ -148,7 +177,7 @@ namespace EmployNetTools.DataLayer
             using (HttpClient client = new HttpClient())
             {
                 // Call asynchronous network methods in a try/catch block to handle exceptions
-                    client.DefaultRequestHeaders.Add("x-tw-token", "OTZmZGNkOWNmZWJlNGI4MDhlYzAxOGNmMzYyYmZiNWE6M2Q2MWUyNDJlYzUwNDI1Njk1OGZlZTNhOTQyNzE5Mjg=");
+                    client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
                     var result = await client.GetAsync("https://api.ontempworks.com/employees/" + id.ToString());
 
                 //if(result.StatusCode!=System.Net.HttpStatusCode.OK)
@@ -170,7 +199,7 @@ namespace EmployNetTools.DataLayer
             using (HttpClient client = new HttpClient())
             {
                 // Call asynchronous network methods in a try/catch block to handle exceptions
-                client.DefaultRequestHeaders.Add("x-tw-token", "OTZmZGNkOWNmZWJlNGI4MDhlYzAxOGNmMzYyYmZiNWE6M2Q2MWUyNDJlYzUwNDI1Njk1OGZlZTNhOTQyNzE5Mjg=");
+                client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
                 var result = await client.GetAsync("https://api.ontempworks.com/employees/" + id.ToString()+"/documents?take=1000&skip=0");
 
                 if (result.StatusCode != System.Net.HttpStatusCode.OK)
@@ -194,7 +223,7 @@ namespace EmployNetTools.DataLayer
             using (HttpClient client = new HttpClient())
             {
                 // Call asynchronous network methods in a try/catch block to handle exceptions
-                client.DefaultRequestHeaders.Add("x-tw-token", "OTZmZGNkOWNmZWJlNGI4MDhlYzAxOGNmMzYyYmZiNWE6M2Q2MWUyNDJlYzUwNDI1Njk1OGZlZTNhOTQyNzE5Mjg=");
+                client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
                 var result = await client.GetAsync("https://api.ontempworks.com/users/" + id.ToString());
 
                 //if(result.StatusCode!=System.Net.HttpStatusCode.OK)
@@ -207,6 +236,28 @@ namespace EmployNetTools.DataLayer
                 // string responseBody = await client.GetStringAsync(uri);
 
                 return user;
+            }
+
+        }
+
+        public static async System.Threading.Tasks.Task<WorkSite> GetWorksiteFromTempworksAsync(int id)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                // Call asynchronous network methods in a try/catch block to handle exceptions
+                client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
+                var result = await client.GetAsync("https://api.ontempworks.com/JobOrders/" + id.ToString() + "/Worksite");
+
+                //if(result.StatusCode!=System.Net.HttpStatusCode.OK)
+                //throw new Exception(result.Content.)
+                //string contnet = await result.Content.ReadAsStringAsync();
+                WorkSite ret = await result.Content.ReadFromJsonAsync<WorkSite>();
+
+
+                // Above three lines can be replaced with new helper method below
+                // string responseBody = await client.GetStringAsync(uri);
+
+                return ret;
             }
 
         }

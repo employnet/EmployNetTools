@@ -65,24 +65,57 @@ namespace EmployNetTools.Controllers
         }
 
         [HttpGet]
+        [ActionName("GetEmployeeEEO")]
+        public async Task<IActionResult> GetEmployeeEEOAsync()
+        {
+            var emps = _context.GetEmployeeListAsync().Result;
+            using (SqlConnection con = new SqlConnection(ConnectionString))
+            {
+                try
+                {
+                    con.Open();
+                    foreach (DataLayer.Models.TempWorksDB.EmployeeList e in emps)
+                    {
+                        try
+                        {
+                            EEO doc = await TempWorksAPI.GetEmployeeEEOFromTempworksAsync(e.EmployeeId);
+                            DataLayer.TempWorks.AddEEOProc(con, doc);
+                           
+                        }
+                        catch (Exception ex)
+                        {
+                            _context.SaveErrorProc(con, "Error Updating Employee " + e.EmployeeId.ToString(), ex.Message);
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+
+                }
+
+            }
+            return Ok("Success");
+        }
+
+        [HttpGet]
         [ActionName("GetEmployeeDocs")]
         public async Task<IActionResult> GetEmployeeDocsAsync()
         {
-            var emps = _context.GetEmployeeAllListAsync().Result;
+            var emps = _context.GetEmployeeListAsync().Result;
 
-            string conStr = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
+            string conStr = ConnectionString;
 
             using (SqlConnection con = new SqlConnection(conStr))
             {
                 try
                 {
                     con.Open();
-                    foreach (DataLayer.Models.TempWorksDB.EmployeeAllList e in emps)
+                    foreach (DataLayer.Models.TempWorksDB.EmployeeList e in emps)
                     {
                         try
                         {
                             Documents docs = await TempWorksAPI.GetEmployeeDocsFromTempworksAsync(e.EmployeeId);
-                            if(docs.count>0)
+                            if(docs.totalCount>0)
                             { 
                                 foreach(Document doc in docs.data)
                                 { 
@@ -112,7 +145,7 @@ namespace EmployNetTools.Controllers
         {
             var emps = _context.GetEmployeeListAsync().Result;
 
-            string conStr = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
+            string conStr = ConnectionString;
 
             using (SqlConnection con = new SqlConnection(conStr))
             {
@@ -245,9 +278,40 @@ namespace EmployNetTools.Controllers
             return Ok();
         }
         
+        [HttpGet]
+        [ActionName("GetAllAssignments")]
+        public async Task<IActionResult> GetAllAssignments()
+        {
+            using (SqlConnection con = new SqlConnection(ConnectionString))
+            {
+                con.Open();
+                try
+                {
+                Assignments rets = await TempWorksAPI.SearchAssignmentFromTempworksAsync();
+                foreach(Assignment ass in rets.data)
+                {
+                        DataLayer.TempWorks.AddAssignmentProc(con, ass);
+                        if(ass.jobOrderId!=0)
+                        {
+                            WorkSite site = await TempWorksAPI.GetWorksiteFromTempworksAsync(ass.jobOrderId);
+                            DataLayer.TempWorks.AddWorkSiteProc(con, site, DataLayer.TempWorks.AddAddressProc(con, site.address));
+                        }
+
+                }
+            }
+            catch(Exception ex)
+            {
+                _context.SaveErrorProc(con, "Error in employees", ex.Message);
+
+                return BadRequest(ex.Message);
+            }
+            }
+            return Ok("Success");
+        }
+
         [HttpPost]
         [ActionName("AddAssignments")]
-        public IActionResult AddAssignments([FromBody] Assignments models)
+        public async Task<IActionResult> AddAssignments([FromBody] Assignments models)
         {
             string conStr = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
 
@@ -267,6 +331,12 @@ namespace EmployNetTools.Controllers
                     foreach (Assignment model in models.data)
                     {
                         DataLayer.TempWorks.AddAssignmentProc(con, model);
+                        if (model.jobOrderId != 0)
+                        {
+                            WorkSite site = await TempWorksAPI.GetWorksiteFromTempworksAsync((int)model.jobOrderId);
+                            DataLayer.TempWorks.AddWorkSiteProc(con, site, DataLayer.TempWorks.AddAddressProc(con, site.address));
+                        }
+
                     }
                     //_context.SaveChanges();
                 }
