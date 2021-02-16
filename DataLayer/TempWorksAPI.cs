@@ -14,6 +14,36 @@ namespace EmployNetTools.DataLayer
     {
         const string APIKey = "ZWU2Yzk2ODU0ZmYyNGRlMDgwMWMxOTFjNjM0Njg5YjI6YzU4N2ZhM2NhNDdmNGEyY2IxOGEyNDdjNTAwMzI5ZDI=";
 
+        public static async System.Threading.Tasks.Task<SearchColumns> GetSearchColumnsFromTempworksAsync(int id)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                // Call asynchronous network methods in a try/catch block to handle exceptions
+                client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
+                var result = await client.GetAsync("https://api.ontempworks.com/Search/" + id.ToString() + "/Columns");
+
+                SearchColumns cols = await result.Content.ReadFromJsonAsync<SearchColumns>();
+
+                return cols;
+            }
+
+        }
+
+        public static async System.Threading.Tasks.Task<Paychecks> GetEmployeePaychecksFromTempworksAsync(int id)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                // Call asynchronous network methods in a try/catch block to handle exceptions
+                client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
+                var result = await client.GetAsync("https://api.ontempworks.com/Employees/" + id.ToString() + "/paychecks?take=1&skip=0&OrderBy=checkDate&orderByAscending=false");
+
+                Paychecks custs = await result.Content.ReadFromJsonAsync<Paychecks>();
+
+                return custs;
+            }
+
+        }
+
         public static async System.Threading.Tasks.Task<EEO> GetEmployeeEEOFromTempworksAsync(int id)
         {
             using (HttpClient client = new HttpClient())

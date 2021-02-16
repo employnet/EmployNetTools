@@ -11,6 +11,55 @@ namespace EmployNetTools.DataLayer
     public class TempWorks
     {
 
+        public static bool SetSearchColumProc(SqlConnection con, SearchColumn model)
+        {
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = con;
+                cmd.Parameters.Add(new SqlParameter("columnId", model.columnId));
+                cmd.Parameters.Add(new SqlParameter("categoryId", model.categoryId));
+                cmd.Parameters.Add(new SqlParameter("@category", model.category));
+                cmd.Parameters.Add(new SqlParameter("tableId", model.tableId));
+                cmd.Parameters.Add(new SqlParameter("@columnType", model.columnType));
+                cmd.Parameters.Add(new SqlParameter("columnName", model.columnName));
+                cmd.Parameters.Add(new SqlParameter("columnDisplayName", model.columnDisplayName));
+                cmd.Parameters.Add(new SqlParameter("returnedColumnName", model.returnedColumnName));
+                cmd.Parameters.Add(new SqlParameter("returnedColumnType", model.returnedColumnType));
+                cmd.Parameters.Add(new SqlParameter("datalistId", model.datalistId));
+                cmd.Parameters.Add(new SqlParameter("isNullable", model.isNullable));
+                cmd.Parameters.Add(new SqlParameter("isCustomData", model.isCustomData));
+                cmd.Parameters.Add(new SqlParameter("isCustomDataJsonArray", model.isCustomDataJsonArray));
+                cmd.Parameters.Add(new SqlParameter("canBeIncludedInResults", model.canBeIncludedInResults));
+                cmd.Parameters.Add(new SqlParameter("originTypeId", model.originTypeId));
+                cmd.Parameters.Add(new SqlParameter("originIdColumn", model.originIdColumn==null?"":model.originIdColumn));
+                cmd.Parameters.Add(new SqlParameter("displayMaskId", model.displayMaskId==null?"":model.displayMaskId));
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.CommandText = "prAddTWColumns";
+                cmd.ExecuteNonQuery();
+
+            }
+
+
+            return true;
+
+        }
+        public static bool SetLastPayCheckProc(SqlConnection con, int EmployeeID, DateTime LastPayCheck)
+        {
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = con;
+                cmd.Parameters.Add(new SqlParameter("@EmployeeId", EmployeeID));
+                cmd.Parameters.Add(new SqlParameter("@PayCheckDate", LastPayCheck));
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.CommandText = "prSetEmployeePayCheckDate";
+                cmd.ExecuteNonQuery();
+
+            }
+
+
+            return true;
+
+        }
         public static bool AddEEOProc(SqlConnection con, DataLayer.Models.TempWorks.EEO model)
         {
 

@@ -392,6 +392,57 @@ namespace EmployNetTools.DataLayer.Models.TempWorks
         public Int32? veteranStatusId { get; set; }
 
     }
+
+    public class Paychecks
+    {
+        public Paycheck[] data { get; set; }
+        public Int32 TotalCount { get; set; }
+    }
+
+    public class Paycheck
+    { 
+        public Int64 paycheckId { get; set; }
+        public string stagedPaycheckId { get; set; }
+        public Int32 checkNumber { get; set; }
+        public Int32 payrollRunId { get; set; }
+        public string checkDate { get; set; }
+        public string checkStatus { get; set; }
+        public string paidToTheOrderOf { get; set; }
+        public bool isElectronicPay { get; set; }
+        public double grossPay { get; set; }
+        public double totalAdjustmentAmountWithheld { get; set; }
+        public double netPay { get; set; }
+        public double totalEmployeeTaxAmountWithheld { get; set; }
+        public double totalHours { get; set; }
+        public Int32 employerId { get; set; }
+        public string employer { get; set; }
+    }
+
+    public class SearchColumns
+    {
+        public SearchColumn[] data { get; set; }
+        public Int32 TotalCount { get; set; }
+    }
+    public class SearchColumn
+    {
+            public string columnId { get; set; }
+            public string categoryId { get; set; }
+            public string category { get; set; }
+            public string tableId { get; set; }
+            public string columnType { get; set; }
+            public string columnName { get; set; }
+            public string columnDisplayName { get; set; }
+            public string returnedColumnName { get; set; }
+            public string returnedColumnType { get; set; }
+            public string datalistId { get; set; }
+            public bool isNullable { get; set; }
+            public bool isCustomData { get; set; }
+            public bool isCustomDataJsonArray { get; set; }
+            public bool canBeIncludedInResults { get; set; }
+            public Int32? originTypeId { get; set; }
+            public string originIdColumn { get; set; }
+            public string displayMaskId { get; set; }
+    }
 }
     
 

@@ -64,6 +64,9 @@ namespace EmployNetTools.Controllers
             return Ok();
         }
 
+
+
+
         [HttpGet]
         [ActionName("GetEmployeeEEO")]
         public async Task<IActionResult> GetEmployeeEEOAsync()
@@ -95,6 +98,49 @@ namespace EmployNetTools.Controllers
 
             }
             return Ok("Success");
+        }
+
+        [HttpGet]
+        [ActionName("GetEmployeePaychecks")]
+        public async Task<IActionResult> GetEmployeePaychecksAsync()
+        {
+            var emps = _context.GetEmployeeListAsync().Result;
+
+            string conStr = ConnectionString;
+
+            using (SqlConnection con = new SqlConnection(conStr))
+            {
+                try
+                {
+                    con.Open();
+                    foreach (DataLayer.Models.TempWorksDB.EmployeeList e in emps)
+                    {
+                        try
+                        {
+                            Paychecks docs = await TempWorksAPI.GetEmployeePaychecksFromTempworksAsync(e.EmployeeId);
+                            if (docs.TotalCount > 0)
+                            {
+                                foreach (Paycheck doc in docs.data)
+                                {
+                                    DataLayer.TempWorks.SetLastPayCheckProc(con, e.EmployeeId, Convert.ToDateTime(doc.checkDate));
+                                }
+                                _context.SaveErrorProc(con, "Set LastPaycheck for employee " + e.EmployeeId.ToString(), "");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _context.SaveErrorProc(con, "Error Updating Employee LastPayCheck " + e.EmployeeId.ToString(), ex.Message);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _context.SaveErrorProc(con, "Error updating employee checkdate", ex.Message);
+                    return BadRequest(ex.Message);
+                }
+
+            }
+            return Ok();
         }
 
         [HttpGet]
@@ -139,6 +185,7 @@ namespace EmployNetTools.Controllers
             }
             return Ok();
         }
+
         [HttpGet]
         [ActionName("GetEmployeeDetails")]
         public async Task<IActionResult> GetEmployeeDetailsAsync()
@@ -277,7 +324,58 @@ namespace EmployNetTools.Controllers
             }
             return Ok();
         }
-        
+
+        [HttpGet]
+        [ActionName("GetAllSearchColumns")]
+        public async Task<IActionResult> GetAllSearchColumns()
+        {
+            using (SqlConnection con = new SqlConnection(ConnectionString))
+            {
+                con.Open();
+                try
+                {
+                    SearchColumns rets = await TempWorksAPI.GetSearchColumnsFromTempworksAsync(1);
+                    foreach (SearchColumn col in rets.data)
+                    {
+                        DataLayer.TempWorks.SetSearchColumProc(con, col);
+                    }
+
+                    rets = await TempWorksAPI.GetSearchColumnsFromTempworksAsync(2);
+                    foreach (SearchColumn col in rets.data)
+                    {
+                        DataLayer.TempWorks.SetSearchColumProc(con, col);
+                    }
+
+                    rets = await TempWorksAPI.GetSearchColumnsFromTempworksAsync(3);
+                    foreach (SearchColumn col in rets.data)
+                    {
+                        DataLayer.TempWorks.SetSearchColumProc(con, col);
+                    }
+
+                    rets = await TempWorksAPI.GetSearchColumnsFromTempworksAsync(8);
+                    foreach (SearchColumn col in rets.data)
+                    {
+                        DataLayer.TempWorks.SetSearchColumProc(con, col);
+                    }
+
+                    rets = await TempWorksAPI.GetSearchColumnsFromTempworksAsync(14);
+                    foreach (SearchColumn col in rets.data)
+                    {
+                        DataLayer.TempWorks.SetSearchColumProc(con, col);
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    _context.SaveErrorProc(con, "Error in employees", ex.Message);
+
+                    return BadRequest(ex.Message);
+                }
+            }
+            return Ok("Success");
+        }
+
+
         [HttpGet]
         [ActionName("GetAllAssignments")]
         public async Task<IActionResult> GetAllAssignments()
