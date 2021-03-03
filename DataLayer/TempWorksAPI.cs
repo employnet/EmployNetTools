@@ -14,6 +14,41 @@ namespace EmployNetTools.DataLayer
     {
         const string APIKey = "ZWU2Yzk2ODU0ZmYyNGRlMDgwMWMxOTFjNjM0Njg5YjI6YzU4N2ZhM2NhNDdmNGEyY2IxOGEyNDdjNTAwMzI5ZDI=";
 
+        public static async System.Threading.Tasks.Task<ServiceReps> GetServiceRepsFromTempworksAsync()
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                // Call asynchronous network methods in a try/catch block to handle exceptions
+                client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
+                var result = await client.GetAsync("https://api.ontempworks.com/datalists/ServiceReps?skip=0&take=10000&includeInactives=true");
+
+                ServiceReps res = await result.Content.ReadFromJsonAsync<ServiceReps>();
+
+                return res;
+            }
+
+        }
+
+        public static async System.Threading.Tasks.Task<Messages> GetEmployeeMessagesTempworksAsync(int id)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                // Call asynchronous network methods in a try/catch block to handle exceptions
+                client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
+                var result = await client.GetAsync("https://api.ontempworks.com/Employees/" + id.ToString() + "/messages?startdate=01-01-2021");
+                try
+                {
+                    Messages cols = await result.Content.ReadFromJsonAsync<Messages>();
+
+                    return cols;
+                }
+                catch(Exception ex)
+                {
+                    return null;
+                }
+            }
+
+        }
         public static async System.Threading.Tasks.Task<SearchColumns> GetSearchColumnsFromTempworksAsync(int id)
         {
             using (HttpClient client = new HttpClient())
@@ -75,26 +110,31 @@ namespace EmployNetTools.DataLayer
 
         }
 
+        public static async System.Threading.Tasks.Task<Employees> SearchEmployeeFromTempworksAsync()
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
+                var result = await client.GetAsync("https://api.ontempworks.com/search/employees?skip=0&take=20000&orderBy=employeeId&orderByAscending=false");
+
+                Employees ret = await result.Content.ReadFromJsonAsync<Employees>();
+
+                return ret;
+            }
+        }
+
+
         public static async System.Threading.Tasks.Task<Assignments> SearchAssignmentFromTempworksAsync()
         {
             using (HttpClient client = new HttpClient())
             {
-                // Call asynchronous network methods in a try/catch block to handle exceptions
                 client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
                 var result = await client.GetAsync("https://api.ontempworks.com/search/assignments/?skip=0&take=100000&IsActive=true");
 
-                //if(result.StatusCode!=System.Net.HttpStatusCode.OK)
-                //throw new Exception(result.Content.)
-                //string contnet = await result.Content.ReadAsStringAsync();
                 Assignments ret = await result.Content.ReadFromJsonAsync<Assignments>();
-
-
-                // Above three lines can be replaced with new helper method below
-                // string responseBody = await client.GetStringAsync(uri);
 
                 return ret;
             }
-
         }
         public static async System.Threading.Tasks.Task<JobOrders> SearchJobOrdersFromTempworksAsync()
         {
@@ -201,7 +241,6 @@ namespace EmployNetTools.DataLayer
         }
 
 
-
         public static async System.Threading.Tasks.Task<Employee> GetEmployeeFromTempworksAsync(int id)
         {
             using (HttpClient client = new HttpClient())
@@ -209,17 +248,18 @@ namespace EmployNetTools.DataLayer
                 // Call asynchronous network methods in a try/catch block to handle exceptions
                     client.DefaultRequestHeaders.Add("x-tw-token", APIKey);
                     var result = await client.GetAsync("https://api.ontempworks.com/employees/" + id.ToString());
-
+                //HttpResponseMessage result = client.Get("https://api.ontempworks.com/employees/" + id.ToString());
                 //if(result.StatusCode!=System.Net.HttpStatusCode.OK)
-                    //throw new Exception(result.Content.)
-                    //string contnet = await result.Content.ReadAsStringAsync();
-                    Employee emp = await result.Content.ReadFromJsonAsync<Employee>() ;
+                //throw new Exception(result.Content.)
+                //string contnet = await result.Content.ReadAsStringAsync();
+//                Employee emp = await result.Content.ReadFromJsonAsync<Employee>() ;
+                Employee emp = await result.Content.ReadFromJsonAsync<Employee>();
 
-                    
-                    // Above three lines can be replaced with new helper method below
-                    // string responseBody = await client.GetStringAsync(uri);
 
-                    return emp;
+                // Above three lines can be replaced with new helper method below
+                // string responseBody = await client.GetStringAsync(uri);
+
+                return emp;
             }
 
         }
@@ -234,7 +274,8 @@ namespace EmployNetTools.DataLayer
 
                 if (result.StatusCode != System.Net.HttpStatusCode.OK)
                 {
-                    throw new Exception("Employee not found");
+                    return null;
+                    //throw new Exception("Employee not found");
                     //string contnet = await result.Content.ReadAsStringAsync();
                 }
                 Documents docs = await result.Content.ReadFromJsonAsync<Documents>();

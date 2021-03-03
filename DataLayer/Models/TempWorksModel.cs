@@ -443,6 +443,37 @@ namespace EmployNetTools.DataLayer.Models.TempWorks
             public string originIdColumn { get; set; }
             public string displayMaskId { get; set; }
     }
+    public class ServiceRep
+    {
+        public Int32 srIdent { get; set; }
+        public string serviceRep { get; set; }
+        public string serviceRepFullName { get; set; }
+        public bool isActive { get; set; }
+    }
+
+    public class ServiceReps
+    {
+        public ServiceRep[] data { get; set; }
+        public Int32 totalCount { get; set; }
+    }
+
+    public class Message
+    {
+        public Int32 id { get; set; }
+        public string message { get; set; }
+        public string date { get; set; }
+        public string action { get; set; }
+        public string actionDescription { get; set; }
+        public Int32 authorSrIdent { get; set; }
+        public string author { get; set; }
+
+    }
+
+    public class Messages
+    {
+        public Message[] data { get; set; }
+        public Int32 totalCount { get; set; } 
+    }
 }
     
 

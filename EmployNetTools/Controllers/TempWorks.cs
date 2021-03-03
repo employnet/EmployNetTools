@@ -23,11 +23,13 @@ namespace EmployNetTools.Controllers
     {
         private readonly DataSurfContext _context;
         private readonly string ConnectionString = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
+        private bool[] isRunning;
 
         public TempWorks(DataSurfContext context)
         {
             context.ChangeTracker.QueryTrackingBehavior = Microsoft.EntityFrameworkCore.QueryTrackingBehavior.NoTracking;
             _context = context;
+            isRunning = new bool[100];
         }
 
 
@@ -35,9 +37,7 @@ namespace EmployNetTools.Controllers
         [ActionName("GetJobOrders")]
         public async Task<IActionResult> GetJobOrders()
         {
-            string conStr = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
-
-            using (SqlConnection con = new SqlConnection(conStr))
+            using (SqlConnection con = new SqlConnection(ConnectionString))
             {
                 con.Open();
                 try
@@ -56,6 +56,37 @@ namespace EmployNetTools.Controllers
                     }
                 }
                 catch(Exception ex)
+                {
+                    _context.SaveErrorProc(con, "Error JobOrder", ex.Message);
+                    return BadRequest(ex.Message);
+                }
+            }
+            return Ok();
+        }
+
+        [HttpGet]
+        [ActionName("GetServiceReps")]
+        public async Task<IActionResult> GetServiceReps()
+        {
+            using (SqlConnection con = new SqlConnection(ConnectionString))
+            {
+                con.Open();
+                try
+                {
+                    ServiceReps res = await TempWorksAPI.GetServiceRepsFromTempworksAsync();
+                    foreach (ServiceRep rep in res.data)
+                    {
+                        try
+                        {
+                            DataLayer.TempWorks.AddServiceRepProc(con, rep);
+                        }
+                        catch (Exception ex)
+                        {
+                            _context.SaveErrorProc(con, "Error servicerep " + rep.serviceRepFullName.ToString(), ex.Message);
+                        }
+                    }
+                }
+                catch (Exception ex)
                 {
                     _context.SaveErrorProc(con, "Error JobOrder", ex.Message);
                     return BadRequest(ex.Message);
@@ -161,7 +192,7 @@ namespace EmployNetTools.Controllers
                         try
                         {
                             Documents docs = await TempWorksAPI.GetEmployeeDocsFromTempworksAsync(e.EmployeeId);
-                            if(docs.totalCount>0)
+                            if(docs!=null && docs.totalCount>0)
                             { 
                                 foreach(Document doc in docs.data)
                                 { 
@@ -186,12 +217,30 @@ namespace EmployNetTools.Controllers
             return Ok();
         }
 
+
+        [HttpGet("id")]
+        [ActionName("Status")]
+        public IActionResult Status(int id)
+        {
+            if (isRunning[id] == true)
+            {
+                HttpContext path = this.HttpContext;
+                string URL = "https://" + path.Request.Host + "Status/1";
+                return Accepted(new Uri(URL));
+            }
+            else
+                return Ok("Completed");
+
+        }
+
         [HttpGet]
         [ActionName("GetEmployeeDetails")]
         public async Task<IActionResult> GetEmployeeDetailsAsync()
         {
+
             var emps = _context.GetEmployeeListAsync().Result;
 
+            string ConnectionString = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
             string conStr = ConnectionString;
 
             using (SqlConnection con = new SqlConnection(conStr))
@@ -218,7 +267,7 @@ namespace EmployNetTools.Controllers
                 catch (Exception ex)
                 {
                     _context.SaveErrorProc(con, "Error adding employee", ex.Message);
-                    return BadRequest(ex.Message);
+                    return Ok();
                 }
 
             }
@@ -247,9 +296,9 @@ namespace EmployNetTools.Controllers
 
             //            DbContextOptionsBuilder options = new DbContextOptionsBuilder();
 
-            string conStr = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
+            
 
-            using (SqlConnection con = new SqlConnection(conStr))
+            using (SqlConnection con = new SqlConnection(ConnectionString))
             {
 
                 try
@@ -281,12 +330,7 @@ namespace EmployNetTools.Controllers
         [ActionName("AddEmployees")]
         public IActionResult AddEmployees([FromBody] Employees models)
         {
-
-//            DbContextOptionsBuilder options = new DbContextOptionsBuilder();
-
-            string conStr = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
- 
-            using (SqlConnection con = new SqlConnection(conStr))
+            using (SqlConnection con = new SqlConnection(ConnectionString))
             {
 
                 try
@@ -531,14 +575,46 @@ namespace EmployNetTools.Controllers
         }
 
         [HttpGet]
+        [ActionName("GetMasterAllEmployeesAndDetails")]
+        public async Task<IActionResult> GetMasterAllEmployeesAndDetails()
+        {
+            var emps = await TempWorksAPI.SearchEmployeeFromTempworksAsync();
+            using (SqlConnection con = new SqlConnection(ConnectionString))
+            {
+                con.Open();
+                foreach (Employee emp in emps.data)
+                {
+                    // add basic employee without replace
+                    DataLayer.TempWorks.AddEmployeeProc(con, emp, false);
+                    // get their messages
+                    Messages msgs = await TempWorksAPI.GetEmployeeMessagesTempworksAsync(emp.employeeId);
+                    if(msgs!=null)
+                    { 
+                    foreach(Message msg in msgs.data)
+                    {
+                        DataLayer.TempWorks.AddMessageProc(con, msg);
+                    }}
+
+                    Documents docs = await TempWorksAPI.GetEmployeeDocsFromTempworksAsync(emp.employeeId);
+                    if(docs!=null)
+                    { 
+                    foreach(Document doc in docs.data)
+                    {
+                        DataLayer.TempWorks.AddDocumentProc(con, emp.employeeId,doc);
+                    }}
+                }
+            }
+            return Ok();
+
+        }
+
+        [HttpGet]
         [ActionName("GetCustomerDetails")]
         public async Task<IActionResult> GetCustomerDetailsAsync()
         {
             var custs = _context.GetCustomerListAsync().Result;
 
-            string conStr = "Server=employnetdata.database.windows.net;Database=DataSurf;Trusted_Connection=false;User Id=employnet;password=Employ1Now!";
-
-            using (SqlConnection con = new SqlConnection(conStr))
+            using (SqlConnection con = new SqlConnection(ConnectionString))
             {
 
                 try

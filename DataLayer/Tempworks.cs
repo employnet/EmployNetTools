@@ -90,6 +90,46 @@ namespace EmployNetTools.DataLayer
             return true;
         }
 
+        public static bool AddMessageProc(SqlConnection con, DataLayer.Models.TempWorks.Message model)
+        {
+
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = con;
+                cmd.Parameters.Add(new SqlParameter("@ID", model.id));
+                cmd.Parameters.Add(new SqlParameter("@Message", model.message));
+                cmd.Parameters.Add(new SqlParameter("@MessageDate", DateTime.Parse(String.IsNullOrEmpty(model.date) ? "01/01/1900" : model.date)));
+                cmd.Parameters.Add(new SqlParameter("@Action", model.action));
+                cmd.Parameters.Add(new SqlParameter("@ActionDescription", model.actionDescription));
+                cmd.Parameters.Add(new SqlParameter("@Author", model.author));
+                cmd.Parameters.Add(new SqlParameter("@ServiceRepId", model.authorSrIdent));
+
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.CommandText = "prAddMessage";
+                cmd.ExecuteNonQuery();
+            }
+
+            return true;
+        }
+        public static bool AddServiceRepProc(SqlConnection con, DataLayer.Models.TempWorks.ServiceRep model)
+        {
+
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = con;
+                cmd.Parameters.Add(new SqlParameter("@ServiceRepID", model.srIdent));
+                cmd.Parameters.Add(new SqlParameter("@ServiceRep", model.serviceRep));
+                cmd.Parameters.Add(new SqlParameter("@ServiceRepFullName", model.serviceRepFullName));
+                cmd.Parameters.Add(new SqlParameter("@IsActive", model.isActive == true ? 1 : 0));
+
+
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.CommandText = "prAddServiceRep";
+                cmd.ExecuteNonQuery();
+            }
+
+            return true;
+        }
         public static int AddAddressProc(SqlConnection con, DataLayer.Models.TempWorks.Address model)
         {
             if (String.IsNullOrEmpty(model.Street1)) return 0;
