@@ -16,6 +16,12 @@ namespace EmployNetTools.DataLayer
 
 
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Models.EmploynetDB.PeopleNet_PDID>()
+                .HasKey(c => new { c.DateTime, c.EmployeeNo, c.InTime });
+        }
         public DbSet<Models.CovidTestDBModel> CovidTests { get; set; }
 
         public DbSet<Models.ACTIVITY_LOG> Activity_log { get; set; }
@@ -43,6 +49,8 @@ namespace EmployNetTools.DataLayer
         public DbSet<Models.EmploynetDB.LoginAccount> Login { get; set; }
 
         public DbSet<Models.TempWorksDB.RepUserId> RepUserList { get; set; }
+
+        public DbSet<Models.EmploynetDB.PeopleNet_PDID> PeopleNet_PDID { get; set; }
 
         public async System.Threading.Tasks.Task<Models.TempWorksDB.CustomerList[]> GetCustomerListAsync()
         {

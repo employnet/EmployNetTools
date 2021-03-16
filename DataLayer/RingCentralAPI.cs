@@ -52,6 +52,8 @@ namespace EmployNetTools.DataLayer
                 {
                     Console.WriteLine("Call type: " + record.type);
                 }
+                var resp2 = await client.Restapi().Account().Extension().MessageStore().List();
+                //var resp3 = await client.Restapi().Account().Presence();
             }
             catch(Exception ex)
             {
